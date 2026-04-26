@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "api-mcp",
+  "compatibility_date": "2025-08-03",
+  "main": "./src/index.tsx",
+  "d1_databases": [
+    {
+      // wrangler d1 create api-mcp-db で作成後、database_id を設定する
+      "binding": "DB_API_MCP",
+      "database_name": "api-mcp-db",
+      "database_id": "YOUR_API_MCP_D1_DATABASE_ID",
+      // packages/database で生成したSQLマイグレーションファイルの参照先
+      "migrations_dir": "../../packages/database/migrations/mcp"
+    }
+  ],
+  "services": [
+    {
+      // api-mcp → oauth への通信は Service Binding 経由（fetch() では同アカウントWorker間は通信不可）
+      // oauth Worker をデプロイ後に有効になる
+      "binding": "OAUTH_SERVICE",
+      "service": "oauth"
+    }
+  ]
+}

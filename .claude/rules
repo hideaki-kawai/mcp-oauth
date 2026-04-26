@@ -1,0 +1,25 @@
+# Claude Code ルール
+
+## 基本方針
+
+- 日本語でコメント・ドキュメントを記述する
+- 不明点は推測せず質問する
+- `as` による型キャストを禁止する
+
+## アーキテクチャ
+
+- バーティカルスライス: Controller → Service → Repository の順に呼び出す
+- レイヤーのスキップ禁止（Controller から Repository を直接呼ばない）
+- Service / Repository は static メソッドを持つ Class で実装する
+- Service / Repository の戻り値は `Result<T>` 型（`@mcp-oauth/types`）を使用する
+
+## コーディング規則
+
+- パスはハードコードせず `PATHS` 定数を使用する
+- 異なる機能スライス間で service/repository を共有しない
+- コメントは WHY（なぜそうしたか）を記述し、WHAT（何をしているか）は書かない
+
+## Cloudflare Workers
+
+- D1 バインディングは `env.DB_MCP`（MCPサーバー）/ `env.DB_OAUTH`（OAuthサーバー）を使用する
+- Drizzle インスタンスは各リクエストのコンテキストで `drizzle(env.DB_*)` で生成する

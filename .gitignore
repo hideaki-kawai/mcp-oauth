@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.cloudflare/
+.turbo/
+*.local
+.env
+.env.*
+!.env.example
+worker-configuration.d.ts
