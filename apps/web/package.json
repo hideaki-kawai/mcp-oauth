@@ -11,14 +11,17 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@mcp-oauth/constants": "workspace:*",
     "@react-router/node": "7.14.0",
     "@react-router/serve": "7.14.0",
+    "hono": "^4.12.15",
     "isbot": "^5.1.36",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "7.14.0"
   },
   "devDependencies": {
+    "@mcp-oauth/api-mcp": "workspace:*",
     "@react-router/dev": "7.14.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^22",

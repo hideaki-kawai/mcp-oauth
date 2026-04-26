@@ -9,5 +9,8 @@
     "dev": "tsc --watch",
     "lint": "biome lint .",
     "format": "biome format --write ."
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0"
   }
 }

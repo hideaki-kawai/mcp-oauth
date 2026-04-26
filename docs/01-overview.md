@@ -40,7 +40,7 @@ apps/oauth  ← Cloudflare Workers + Hono
 | リフレッシュトークン | ランダム文字列、有効期限 **30日**、DBに保存 |
 | 認可コード | ランダム文字列、有効期限 **10分**、DBに保存・使い捨て |
 | OAuthセッション | JWT（HS256）、有効期限 **7日**、DBに保存しない |
-| パスワード | bcryptハッシュ |
+| パスワード | PBKDF2ハッシュ（`crypto.subtle`、Workers ネイティブ） |
 | 初期ユーザー | DBシーダーで投入済み |
 | スコープ | `read` / `write` |
 

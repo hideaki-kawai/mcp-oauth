@@ -16,8 +16,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/mcp": "^0.1.0",
+    "@mcp-oauth/constants": "workspace:*",
     "@mcp-oauth/database": "workspace:*",
     "@mcp-oauth/types": "workspace:*",
+    "@mcp-oauth/utils": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "drizzle-orm": "^0.44.0",
     "hono": "^4.12.15"
   },

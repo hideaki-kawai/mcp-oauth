@@ -43,7 +43,7 @@ DCR。ClaudeなどMCPクライアントがクライアントIDを動的取得す
 
 ```json
 {
-  "client_id": "nanoid_generated",
+  "client_id": "uuid_generated",
   "client_secret": null,
   "redirect_uris": ["http://localhost:3000/callback"],
   "token_endpoint_auth_method": "none"
@@ -203,7 +203,17 @@ MCPサーバーのメタデータ。ClaudeがDiscovery時に取得する。
 
 ### `GET /mcp` / `POST /mcp`
 
-MCPエンドポイント本体。JWTが必須。
+MCPエンドポイント本体。**Streamable HTTP トランスポート**（MCP v2025-03-26 以降の標準）。JWTが必須。
+
+> **トランスポート方式について**
+>
+> MCP には2つのHTTPトランスポートがある。
+> - **Streamable HTTP**（現行標準）: `/mcp` の1エンドポイントで POST・GET 両対応。
+>   - `POST /mcp` — クライアント→サーバーへのJSON-RPCリクエスト
+>   - `GET /mcp` — サーバー→クライアントへのSSEストリーム（サーバーからの通知用）
+> - **HTTP+SSE**（非推奨）: `/sse`（GET）と `/messages`（POST）の2エンドポイント構成。廃止予定。
+>
+> 実装には **`@hono/mcp`** パッケージを使う（Cloudflare Workers 対応）。
 
 **未認証レスポンス** `401 Unauthorized`
 
@@ -212,6 +222,34 @@ WWW-Authenticate: Bearer resource_metadata="https://api-mcp.example.com/.well-kn
 ```
 
 **認証済みレスポンス** `200 OK` MCPプロトコルのレスポンス
+
+**実装イメージ**
+
+```typescript
+// apps/api-mcp/src/routes/mcp/index.ts
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { StreamableHTTPTransport } from '@hono/mcp'
+import { Hono } from 'hono'
+import { authMiddleware } from '@/domains/auth/middleware'
+
+const app = new Hono<AppEnv>()
+
+// JWT認証ミドルウェアを適用
+app.use(API_MCP_PATHS.MCP, authMiddleware)
+
+app.on(['GET', 'POST'], API_MCP_PATHS.MCP, async (c) => {
+  const server = new McpServer({ name: 'mcp-oauth', version: '1.0.0' })
+
+  // ツール・リソースをここに登録していく
+  // server.tool('tool-name', schema, handler)
+
+  const transport = new StreamableHTTPTransport(c.req.raw)
+  await server.connect(transport)
+  return transport.response
+})
+
+export default app
+```
 
 ---
 

@@ -4,11 +4,12 @@
 
 | フェーズ | 内容 | 動作確認 |
 |---------|------|---------|
-| 0 | 開発環境セットアップ | — |
+| 0 | 依存パッケージインストール・ローカル開発環境セットアップ | — |
 | 1 | 共有パッケージ（DB・ユーティリティ） | — |
 | 2 | OAuthサーバー実装 | — |
-| 3 | api-mcpサーバー実装 → Cloudflareデプロイ → Claude接続確認 | Cloudflare |
-| 4 | WebフロントエンドのBFF追加 → ローカル動作確認 → デプロイ | ローカル → Cloudflare |
+| 3 | api-mcpサーバー実装 | — |
+| 4 | Cloudflareセットアップ → デプロイ → Claude接続確認 | Cloudflare |
+| 5 | WebフロントエンドのBFF追加 → ローカル動作確認 → デプロイ | ローカル → Cloudflare |
 
 **フェーズ順の理由**:
 - OAuthサーバーはapi-mcpとwebの両方が依存するため先に作る
@@ -17,32 +18,91 @@
 
 ---
 
-## フェーズ0: 開発環境セットアップ
+## フェーズ0: 依存パッケージインストール・ローカル開発環境セットアップ
 
 ### 目標
 `pnpm dev` で全アプリが起動し、ローカルD1が使える状態にする。
 
-### 手順
+### 0-1. 依存パッケージのインストール
 
-1. **ローカルD1の作成**
-   ```bash
-   # oauth用DB（ローカルのみ。本番はwrangler d1 createが必要）
-   pnpm -F @mcp-oauth/oauth dev  # 初回起動でローカルD1が自動作成される
-   ```
+各アプリ・パッケージに必要なライブラリを追加する。
 
-2. **シークレットの設定**（`.dev.vars` はgitignore済み）
-   ```bash
-   # apps/oauth/.dev.vars
-   JWT_SECRET=<openssl rand -base64 32 で生成>
+#### ライブラリ一覧
 
-   # apps/api-mcp/.dev.vars
-   JWT_SECRET=<oauthと同じ値>
-   ```
+| ライブラリ | 用途 |
+|-----------|------|
+| `hono` | Cloudflare Workers 向け Web フレームワーク。ルーティング・ミドルウェア・JSX |
+| `drizzle-orm` | TypeScript ORM。Cloudflare D1（SQLite）のクエリを型安全に書く |
+| `drizzle-kit` | Drizzle のCLIツール。スキーマから SQL マイグレーションファイルを生成する |
+| `@cloudflare/vite-plugin` | Vite で Cloudflare Workers をビルド・ローカル実行するプラグイン |
+| `@cloudflare/workers-types` | Workers 環境の型定義（`Env`・`D1Database` など） |
+| `wrangler` | Cloudflare Workers の CLI。ローカル開発・デプロイ・D1 操作 |
+| `bcryptjs` | ❌ 不使用。Cloudflare Workers の CPU 時間制限（無料: 10ms）に bcrypt のコスト計算が収まらないため。代わりに `crypto.subtle`（PBKDF2）を使う（Workers ネイティブ、外部ライブラリ不要） |
+| `nanoid` | ❌ 不使用。`crypto.randomUUID()` が Workers ネイティブで使えるため不要 |
+| `tailwindcss` | ユーティリティファーストの CSS フレームワーク |
+| `@tailwindcss/vite` | Tailwind CSS v4 の Vite プラグイン |
+| `@hono/mcp` | Hono 向け MCP ミドルウェア。Streamable HTTP トランスポートを実装 |
+| `@modelcontextprotocol/sdk` | MCP 公式 SDK。`McpServer` でツール・リソースを登録する |
+| `date-fns` | 日付操作ライブラリ。トークン有効期限の計算（`addSeconds`）・期限切れ判定（`isPast`）に使用 |
+| `hono/client`（`hc`） | Hono RPC クライアント。`AppType` から型安全な API クライアントを生成（`hono` に同梱） |
 
-3. **起動確認**
-   ```bash
-   pnpm dev  # 全アプリ起動
-   ```
+#### インストールコマンド
+
+**`packages/database`**
+```bash
+pnpm -F @mcp-oauth/database add drizzle-orm
+pnpm -F @mcp-oauth/database add -D drizzle-kit @cloudflare/workers-types
+```
+
+**`packages/constants` / `packages/types`**
+```bash
+# 追加ライブラリなし（TypeScriptのみ）
+```
+
+**`packages/utils`**
+```bash
+pnpm -F @mcp-oauth/utils add date-fns
+```
+
+**`apps/oauth`**
+```bash
+pnpm -F @mcp-oauth/oauth add hono drizzle-orm @mcp-oauth/database @mcp-oauth/types @mcp-oauth/constants @mcp-oauth/utils
+pnpm -F @mcp-oauth/oauth add -D @cloudflare/vite-plugin @cloudflare/workers-types wrangler vite
+pnpm -F @mcp-oauth/oauth add -D tailwindcss @tailwindcss/vite
+# bcryptjs・nanoid は不要（後述）
+```
+
+**`apps/api-mcp`**
+```bash
+pnpm -F @mcp-oauth/api-mcp add hono drizzle-orm @mcp-oauth/database @mcp-oauth/types @mcp-oauth/constants
+pnpm -F @mcp-oauth/api-mcp add @hono/mcp @modelcontextprotocol/sdk
+pnpm -F @mcp-oauth/api-mcp add -D @cloudflare/vite-plugin @cloudflare/workers-types wrangler vite
+```
+
+**`apps/web`**
+```bash
+pnpm -F @mcp-oauth/web add hono @mcp-oauth/constants  # hono は hc<AppType> のために必要
+pnpm -F @mcp-oauth/web add -D @mcp-oauth/api-mcp      # Hono RPC の型のみ使用（実行時依存なし）
+# React Router v7・Tailwind CSS は scaffold 時にインストール済み
+```
+
+### 0-2. ローカル開発シークレットの設定
+
+`.dev.vars` はgitignore済み。各自で作成する。
+
+```bash
+# apps/oauth/.dev.vars
+JWT_SECRET=<openssl rand -base64 32 で生成>
+
+# apps/api-mcp/.dev.vars
+JWT_SECRET=<oauth と同じ値>
+```
+
+### 0-3. 起動確認
+
+```bash
+pnpm dev  # 全アプリ起動（ローカルD1 は wrangler dev 初回起動時に自動作成）
+```
 
 ---
 
@@ -78,7 +138,7 @@ pnpm -F @mcp-oauth/api-mcp db:migrate:local
 
 `docs/04-database.md` の初期データを投入するシーダーを実装する。
 
-- `admin@example.com` ユーザー（パスワードはbcryptハッシュ）
+- `admin@example.com` ユーザー（パスワードはPBKDF2ハッシュ）
 - `web-client` OAuthクライアント
 
 ```bash
@@ -94,10 +154,10 @@ pnpm -F @mcp-oauth/database db:seed
 
 | ファイル | 関数 | 説明 |
 |---------|------|------|
-| `password.ts` | `hashPassword(password)` | bcryptハッシュ生成 |
-| `password.ts` | `verifyPassword(password, hash)` | bcrypt照合 |
-| `token.ts` | `generateAuthCode()` | 認可コード生成（nanoid） |
-| `token.ts` | `generateRefreshToken()` | リフレッシュトークン生成（nanoid） |
+| `password.ts` | `hashPassword(password)` | PBKDF2ハッシュ生成（`crypto.subtle`、Workers ネイティブ） |
+| `password.ts` | `verifyPassword(password, hash)` | PBKDF2照合（`crypto.subtle`） |
+| `token.ts` | `generateAuthCode()` | 認可コード生成（`crypto.randomUUID()`） |
+| `token.ts` | `generateRefreshToken()` | リフレッシュトークン生成（`crypto.randomUUID()`） |
 
 **`apps/web/app/shared/lib/`**
 
@@ -174,7 +234,7 @@ JwtDomain.verifyOAuthSession(token, secret): Promise<OAuthSessionPayload>
 
 ClaudeがクライアントIDを動的取得するエンドポイント。
 
-- nanoidでclient_idを生成
+- `crypto.randomUUID()` で client_id を生成
 - `redirect_uris`・`grant_types`・`token_endpoint_auth_method` を検証
 - DB_OAUTHの`oauth_clients`テーブルに保存
 
@@ -209,7 +269,7 @@ curl -X POST http://localhost:PORT/register \
 
 #### 2-6. `POST /authorize/consent` — 同意処理
 
-- `action=approve` → nanoidで認可コード生成、DB_OAUTHに保存 → `redirect_uri?code=...&state=...` へリダイレクト
+- `action=approve` → `crypto.randomUUID()` で認可コード生成、DB_OAUTHに保存 → `redirect_uri?code=...&state=...` へリダイレクト
 - `action=deny` → `redirect_uri?error=access_denied&state=...` へリダイレクト
 
 **ユニットテスト対象**: service.ts の認可コード生成・有効期限設定
@@ -277,49 +337,96 @@ apps/api-mcp/src/
 
 #### 3-3. `GET /mcp` / `POST /mcp` — MCPエンドポイント
 
-JWT認証ミドルウェアを適用した後、MCPプロトコルの応答を返す。
-初期実装は最小限（`tools/list` に空配列を返すだけ）でOK。
-
-### Cloudflareデプロイ
+**`@hono/mcp`** パッケージを使って Streamable HTTP トランスポートを実装する。
+`McpServer`（`@modelcontextprotocol/sdk`）にツール・リソースを登録し、`StreamableHTTPTransport` で Hono に接続する。
+初期実装は最小限（ツール未登録でも `tools/list` に空配列を返せばOK）。
 
 ```bash
-# 本番D1を作成
+pnpm -F @mcp-oauth/api-mcp add @hono/mcp @modelcontextprotocol/sdk
+```
+
+---
+
+## フェーズ4: Cloudflareセットアップ → デプロイ → Claude接続確認
+
+### 目標
+oauth と api-mcp を Cloudflare にデプロイし、Claude から MCP 接続できる状態にする。
+
+### 4-1. Cloudflare アカウント・wrangler セットアップ
+
+```bash
+# wrangler にログイン（ブラウザが開く）
+wrangler login
+
+# ログイン確認
+wrangler whoami
+```
+
+### 4-2. D1 データベース作成
+
+```bash
+# D1 データベースを作成（Cloudflare ダッシュボードに作成される）
 wrangler d1 create oauth-db
 wrangler d1 create api-mcp-db
+```
 
-# wrangler.jsonc の database_id を更新
+出力される `database_id` を各 `wrangler.jsonc` に設定する：
 
-# シークレットをセット
+```jsonc
+// apps/oauth/wrangler.jsonc
+{ "database_id": "<出力されたID>" }
+
+// apps/api-mcp/wrangler.jsonc
+{ "database_id": "<出力されたID>" }
+```
+
+### 4-3. シークレットの設定（本番）
+
+```bash
+# oauth と api-mcp に同じ JWT_SECRET を設定
 wrangler secret put JWT_SECRET --name oauth
 wrangler secret put JWT_SECRET --name api-mcp
+```
 
-# マイグレーション適用（本番D1）
+### 4-4. マイグレーション適用（本番D1）
+
+```bash
 pnpm -F @mcp-oauth/oauth db:migrate:remote
 pnpm -F @mcp-oauth/api-mcp db:migrate:remote
+```
 
-# シード投入
-pnpm -F @mcp-oauth/database db:seed  # リモート用コマンドを別途実装
+### 4-5. シード投入（本番D1）
 
-# デプロイ
+```bash
+pnpm -F @mcp-oauth/database db:seed  # リモート用コマンドを別途実装（wrangler d1 execute 経由）
+```
+
+### 4-6. デプロイ
+
+```bash
 pnpm -F @mcp-oauth/oauth deploy
 pnpm -F @mcp-oauth/api-mcp deploy
 ```
 
-### MCPフロー動作確認（Claude web版）
+デプロイ後のURL例:
+- `https://oauth.<subdomain>.workers.dev`
+- `https://api-mcp.<subdomain>.workers.dev`
 
-1. ClaudeのMCP設定にapi-mcpのURL（`https://api-mcp.example.workers.dev/mcp`）を追加
+### 4-7. MCPフロー動作確認（Claude web版）
+
+1. ClaudeのMCP設定に `https://api-mcp.<subdomain>.workers.dev/mcp` を追加
 2. Claudeが自動でDiscovery → DCR → `/authorize` を開く
 3. ブラウザでログイン → 同意 → 認可コード発行
 4. Claudeがトークンを取得してMCPアクセス成功を確認
 
 ---
 
-## フェーズ4: Webフロントエンド（BFF追加 + SPA）
+## フェーズ5: Webフロントエンド（BFF追加 + SPA）
 
 ### 目標
 ブラウザからOAuthログインしてSPAが動作する状態にする。
 
-### 4-1. api-mcp に BFFエンドポイントを追加
+### 5-1. api-mcp に BFFエンドポイントを追加
 
 `docs/03-endpoints.md` の BFFエンドポイントを実装する。
 
@@ -344,7 +451,7 @@ apps/api-mcp/src/
 
 **ユニットテスト対象**: service.ts のCookie設定ロジック、エラーハンドリング
 
-### 4-2. `apps/web` — 共通ライブラリ
+### 5-2. `apps/web` — 共通ライブラリ
 
 `docs/03-endpoints.md` のコード例を実装する。
 
@@ -359,7 +466,7 @@ apps/web/app/
       auth-middleware.ts   ← clientMiddleware: リフレッシュ試行 or /loginへ
 ```
 
-### 4-3. `apps/web` — ルーティング
+### 5-3. `apps/web` — ルーティング
 
 ```
 apps/web/app/routes/
@@ -374,7 +481,7 @@ apps/web/app/routes/
       page.tsx             ← ログイン後のホーム画面
 ```
 
-### ローカル動作確認
+### 5-4. ローカル動作確認
 
 ```bash
 # OAuthサーバーとapi-mcpをローカル起動
@@ -387,7 +494,7 @@ pnpm -F @mcp-oauth/web dev        # http://localhost:5173
 
 ブラウザで `http://localhost:5173` にアクセスし、OAuthフローが完結することを確認する。
 
-### Cloudflareデプロイ（web）
+### 5-5. Cloudflareデプロイ（web）
 
 ```bash
 pnpm -F @mcp-oauth/api-mcp deploy  # BFFエンドポイント追加分を再デプロイ
@@ -415,7 +522,7 @@ routes/token/
 
 | 優先度 | 対象 | 理由 |
 |-------|------|------|
-| 高 | `packages/utils` の全関数 | 純粋関数・副作用なし・テストが容易 |
+| 高 | `apps/oauth/src/libs/` と `apps/web/.../pkce.ts` の全関数 | 純粋関数・副作用なし・テストが容易 |
 | 高 | `token/service.ts` | PKCE検証・Rotationなど複雑なロジック |
 | 高 | JWT生成・検証（`domains/jwt`） | セキュリティ上重要 |
 | 中 | 各 service.ts のバリデーション | ビジネスロジックの保護 |
@@ -424,28 +531,29 @@ routes/token/
 ### テストコマンド
 
 ```bash
-pnpm -F @mcp-oauth/utils test
 pnpm -F @mcp-oauth/oauth test
 pnpm -F @mcp-oauth/api-mcp test
+pnpm -F @mcp-oauth/web test
 ```
 
 ---
 
 ## 実装チェックリスト
 
-### フェーズ0
+### フェーズ0: 環境セットアップ
+- [ ] 各アプリ・パッケージの依存パッケージインストール
 - [ ] `.dev.vars` に JWT_SECRET を設定
 - [ ] `pnpm dev` で全アプリが起動する
 
-### フェーズ1
+### フェーズ1: 共有パッケージ
 - [ ] DB_OAUTH スキーマ定義
 - [ ] DB_API_MCP スキーマ定義
-- [ ] マイグレーション生成・適用（ローカル）
+- [ ] マイグレーション生成・ローカル適用
 - [ ] シーダー実装・実行
-- [ ] `packages/utils` の関数実装
-- [ ] `packages/utils` のユニットテスト
+- [ ] `apps/oauth/src/libs/` ユーティリティ実装・テスト
+- [ ] `apps/web/app/shared/lib/pkce.ts` 実装・テスト
 
-### フェーズ2
+### フェーズ2: OAuthサーバー
 - [ ] `GET /.well-known/oauth-authorization-server`
 - [ ] `domains/jwt` 実装・テスト
 - [ ] `POST /register` 実装・テスト
@@ -455,15 +563,22 @@ pnpm -F @mcp-oauth/api-mcp test
 - [ ] `POST /token` (authorization_code) 実装・テスト
 - [ ] `POST /token` (refresh_token) 実装・テスト
 
-### フェーズ3
+### フェーズ3: api-mcpサーバー
 - [ ] `GET /.well-known/oauth-protected-resource`
 - [ ] JWT認証ミドルウェア 実装・テスト
-- [ ] `GET /mcp` / `POST /mcp` 実装
-- [ ] Cloudflare D1作成・マイグレーション
-- [ ] Cloudflareデプロイ（oauth・api-mcp）
+- [ ] `GET /mcp` / `POST /mcp` 実装（`@hono/mcp`）
+
+### フェーズ4: Cloudflareセットアップ・デプロイ
+- [ ] `wrangler login`
+- [ ] `wrangler d1 create oauth-db` → `wrangler.jsonc` に `database_id` を設定
+- [ ] `wrangler d1 create api-mcp-db` → `wrangler.jsonc` に `database_id` を設定
+- [ ] `wrangler secret put JWT_SECRET` （oauth・api-mcp 両方）
+- [ ] 本番D1にマイグレーション適用
+- [ ] 本番D1にシード投入
+- [ ] oauth・api-mcp デプロイ
 - [ ] Claude web版からMCP接続確認
 
-### フェーズ4
+### フェーズ5: Webフロントエンド
 - [ ] `POST /api/auth/token` 実装・テスト
 - [ ] `POST /api/auth/refresh` 実装・テスト
 - [ ] `POST /api/auth/logout` 実装・テスト
@@ -476,4 +591,4 @@ pnpm -F @mcp-oauth/api-mcp test
 - [ ] `(private)/layout.tsx` 実装
 - [ ] ホームページ実装
 - [ ] ローカル動作確認（ブラウザでOAuthフロー完結）
-- [ ] Cloudflareデプロイ（api-mcp再デプロイ・web）
+- [ ] api-mcp 再デプロイ（BFF追加分）・web デプロイ
