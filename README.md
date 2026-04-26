@@ -93,8 +93,4 @@ pnpm -F @mcp-oauth/web deploy
 | [docs/06-jwt-tokens.md](./docs/06-jwt-tokens.md) | JWTトークン設計 |
 | [docs/07-implementation-plan.md](./docs/07-implementation-plan.md) | 実装計画・チェックリスト |
 
-### 学習資料
-
-| ファイル | 内容 |
-|---------|------|
-| [docs/learning/oauth-versions.md](./docs/learning/oauth-versions.md) | OAuth 1.0 / 2.0 / 2.1 の違い |
+`docs/learning/` — OAuth フローや仕様の学習用メモ
