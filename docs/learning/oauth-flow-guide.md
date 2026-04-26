@@ -147,9 +147,9 @@ Claude が MCP サーバーに接続するときのフロー。
 ```mermaid
 sequenceDiagram
     actor User as ユーザー（ブラウザ）
-    participant Claude as Claude<br/>（MCPクライアント）
-    participant ApiMcp as api-mcp<br/>（MCPサーバー）
-    participant OAuth as oauth<br/>（OAuthサーバー）
+    participant Claude as Claude（MCPクライアント）
+    participant ApiMcp as api-mcp（MCPサーバー）
+    participant OAuth as oauth（OAuthサーバー）
 
     Note over Claude,OAuth: Phase 1: Discovery（自動）
     Claude->>ApiMcp: GET /mcp
@@ -514,7 +514,7 @@ sequenceDiagram
     OAuth-->>ApiMcp: 200 { access_token, refresh_token }
 
     Note over ApiMcp: Cookie にセット
-    ApiMcp-->>Browser: 200 { access_token }<br/>Set-Cookie: refresh_token=rt_xxx; HttpOnly
+    ApiMcp-->>Browser: 200 { access_token } + Set-Cookie: refresh_token（HttpOnly）
 
     Browser->>Browser: access_token をメモリに保存
     Browser->>User: / にリダイレクト（ログイン完了）
@@ -702,13 +702,12 @@ sequenceDiagram
     participant OAuth as oauth
 
     Note over Browser: access_token が期限切れ or 存在しない
-    Browser->>ApiMcp: POST /api/auth/refresh<br/>Cookie: refresh_token=rt_xxx（自動送信）
-
-    ApiMcp->>OAuth: POST /token（Service Binding）<br/>{ grant_type: refresh_token, refresh_token: rt_xxx }
+    Browser->>ApiMcp: POST /api/auth/refresh（Cookie自動送信）
+    ApiMcp->>OAuth: POST /token（Service Binding）grant_type=refresh_token
     OAuth-->>ApiMcp: 200 { access_token: 新JWT, refresh_token: rt_yyy }
 
     Note over ApiMcp: Cookie を更新
-    ApiMcp-->>Browser: 200 { access_token: 新JWT }<br/>Set-Cookie: refresh_token=rt_yyy; HttpOnly
+    ApiMcp-->>Browser: 200 { access_token: 新JWT } + Set-Cookie: refresh_token（HttpOnly）
 
     Browser->>Browser: access_token をメモリに更新
     Browser->>ApiMcp: 元のリクエストを再送
