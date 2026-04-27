@@ -116,23 +116,92 @@ DBスキーマ・マイグレーション・シーダー・共通ユーティリ
 `docs/04-database.md` の設計をDrizzle ORMで実装する。
 
 **DB_OAUTH テーブル**（`packages/database/src/oauth/schema.ts`）
-- `users` — id, email, password_hash, created_at
-- `oauth_clients` — id, client_id, client_name, redirect_uris, grant_types, token_endpoint_auth_method, created_at
-- `authorization_codes` — id, code, client_id, user_id, redirect_uri, code_challenge, scope, used_at, expires_at, created_at
-- `refresh_tokens` — id, token, client_id, user_id, scope, type（`"mcp"` | `"web"`）, revoked_at, expires_at, created_at
+- `users` — id, email, password_hash, role, created_at, updated_at
+- `oauth_clients` — id, name, redirect_uris, token_endpoint_auth_method, scopes, created_at
+- `authorization_codes` — code, client_id, user_id, scopes, redirect_uri, code_challenge, expires_at, used_at, created_at
+- `refresh_tokens` — token, type（`"mcp"` / `"web"` / `"session"`）, client_id, user_id, scopes, expires_at, revoked_at, created_at
 
-**DB_API_MCP テーブル**（`packages/database/src/api-mcp/schema.ts`）
-- アプリ固有データ（初期は空でOK、マイグレーション生成だけ通す）
+**DB_API_MCP テーブル**（`packages/database/src/mcp/schema.ts`）
+- アプリ固有データのみ（MCP プロトコル用のテーブルは不要）
+- 初期は `export {}` のみ。最初のドメインテーブルが決まってから生成する
+  - 空スキーマで `db:generate:mcp` を実行するとエラーになる
+
+#### ローカル D1 の仕組み
+
+| 項目 | 内容 |
+|------|------|
+| ローカル D1 の実体 | SQLite ファイル |
+| 保存先 | 各アプリの `.wrangler/state/v3/d1/miniflare-D1DatabaseObject/<hash>.sqlite` |
+| いつ作られる？ | `wrangler dev` または `wrangler d1 migrations apply --local` の初回実行時に自動作成 |
+| 識別キー | `wrangler.jsonc` の `database_name`（`database_id` の値はローカルでは使われない） |
+| マイグレーション参照元 | `wrangler.jsonc` の `migrations_dir`（→ `packages/database/migrations/{oauth\|mcp}/`） |
+| アプリごとに別ファイル | `apps/oauth` と `apps/api-mcp` でそれぞれ `.wrangler/` を持つ |
+
+#### 手順（OAuth 側を例に）
 
 ```bash
-# 1. DrizzleスキーマからSQLファイルを生成（packages/database/migrations/ に出力）
+# 1. Drizzle スキーマから SQL マイグレーションファイルを生成
+#    → packages/database/migrations/oauth/0000_xxx.sql が出力される
 pnpm -F @mcp-oauth/database db:generate:oauth
-pnpm -F @mcp-oauth/database db:generate:mcp
 
-# 2. ローカルD1に適用（wrangler dev のローカルD1 = .wrangler/state/v3/d1/ 以下）
+# 2. ローカル D1 に適用
+#    初回実行時に .wrangler/state/v3/d1/ 配下に SQLite ファイルが自動生成される
 pnpm -F @mcp-oauth/oauth db:migrate:local
+
+# 3. 適用結果を確認（テーブル一覧）
+cd apps/oauth
+pnpm wrangler d1 execute oauth-db --local \
+  --command "SELECT name FROM sqlite_master WHERE type='table';"
+
+# 4. 任意のクエリで中身を見る
+pnpm wrangler d1 execute oauth-db --local \
+  --command "SELECT * FROM users LIMIT 10;"
+```
+
+`api-mcp` 側も最初のテーブルを定義したら同じ流れ:
+```bash
+pnpm -F @mcp-oauth/database db:generate:mcp
 pnpm -F @mcp-oauth/api-mcp db:migrate:local
 ```
+
+#### スキーマ変更時のフロー
+
+スキーマを編集した後の典型的な流れ:
+
+```bash
+# 1. schema.ts を編集
+# 2. 差分マイグレーションを生成（前回からの差分のみが新しい SQL ファイルになる）
+pnpm -F @mcp-oauth/database db:generate:oauth
+# 3. ローカル D1 に適用
+pnpm -F @mcp-oauth/oauth db:migrate:local
+```
+
+drizzle-kit は前回のマイグレーション以降の差分だけを生成するので、
+既存テーブルを壊さずカラム追加などができる。
+
+#### ローカル D1 のリセット（開発初期に便利）
+
+スキーマをガラッと変えた / 古い状態を捨てたい時:
+
+```bash
+# OAuth 側の D1 をまるごと削除
+rm -rf apps/oauth/.wrangler/state/v3/d1
+
+# 次回マイグレーション or wrangler dev で再生成される
+pnpm -F @mcp-oauth/oauth db:migrate:local
+```
+
+> ⚠️ **注意**: 本番デプロイ後は `db:migrate:remote` でしか変更を適用してはいけない。
+> リセット（DB 削除）は本番では絶対にやらない。
+
+#### よくあるトラブル
+
+| 症状 | 原因と対処 |
+|------|---------|
+| `Couldn't find a D1 DB with the name or binding` | `wrangler.jsonc` の `database_name` と `db:migrate:local` のスクリプト引数（`oauth-db` など）が一致しているか確認 |
+| `No migrations present at ...` | `db:generate:*` を先に実行していない or `migrations_dir` のパスが間違っている |
+| 適用したはずのカラムが無い | 別アプリの `.wrangler/` を見ている可能性。各アプリは独立した D1 ファイルを持つので `cd apps/oauth` してから実行 |
+| `db:generate:mcp` でエラー | mcp 側スキーマが空（`export {}` のみ）の可能性。最初のテーブルを定義してから実行する |
 
 ### 1-2. `packages/database` — シーダー
 
