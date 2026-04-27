@@ -2,10 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "api-mcp",
   "compatibility_date": "2025-08-03",
+  "compatibility_flags": ["nodejs_compat"],
   "main": "./src/index.tsx",
   "d1_databases": [
     {
       // wrangler d1 create api-mcp-db で作成後、database_id を設定する
+      // ローカル開発時は database_id の値は使われない（database_name でローカルD1ファイルが識別される）
       "binding": "DB_API_MCP",
       "database_name": "api-mcp-db",
       "database_id": "YOUR_API_MCP_D1_DATABASE_ID",
@@ -20,5 +22,19 @@
       "binding": "OAUTH_SERVICE",
       "service": "oauth"
     }
-  ]
+  ],
+  // 環境変数（シークレットは .dev.vars / wrangler secret put で別管理）
+  "vars": {
+    "ENVIRONMENT": "production",
+    // 自分自身のURL（OAuth Protected Resource Metadata の resource 値）
+    // 本番デプロイ後に Cloudflare Workers のURLへ書き換える
+    "API_MCP_BASE_URL": "http://localhost:30001",
+    // OAuthサーバーのURL（メタデータに記載する authorization_servers の値）
+    // 本番デプロイ後に Cloudflare Workers のURLへ書き換える
+    "OAUTH_ISSUER": "http://localhost:30002"
+  },
+  // Workers Logs を有効化（本番障害調査用）
+  "observability": {
+    "enabled": true
+  }
 }

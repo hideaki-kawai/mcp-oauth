@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "web",
+  "compatibility_date": "2025-08-03",
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  // Workers Static Assets として SPA をホスト
+  // - main Worker エントリは不要（assets のみで完結）
+  // - Cloudflare は Pages ではなく Workers を推奨しているため Workers Static Assets を使用
+  "assets": {
+    // React Router v7 の SPA モードは build/client/ 配下に静的ファイルを出力する
+    "directory": "./build/client",
+    // SPA ルーティングのため、未知のパスは index.html にフォールバック
+    "not_found_handling": "single-page-application"
+  },
+  // Workers Logs を有効化（本番障害調査用）
+  "observability": {
+    "enabled": true
+  }
+}

@@ -2,15 +2,28 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "oauth",
   "compatibility_date": "2025-08-03",
+  "compatibility_flags": ["nodejs_compat"],
   "main": "./src/index.tsx",
   "d1_databases": [
     {
       // wrangler d1 create oauth-db で作成後、database_id を設定する
+      // ローカル開発時は database_id の値は使われない（database_name でローカルD1ファイルが識別される）
       "binding": "DB_OAUTH",
       "database_name": "oauth-db",
       "database_id": "YOUR_OAUTH_D1_DATABASE_ID",
       // packages/database で生成したSQLマイグレーションファイルの参照先
       "migrations_dir": "../../packages/database/migrations/oauth"
     }
-  ]
+  ],
+  // 環境変数（シークレットは .dev.vars / wrangler secret put で別管理）
+  "vars": {
+    "ENVIRONMENT": "production",
+    // OAuth issuer / audience の判定に使用する自分自身のURL
+    // 本番デプロイ後に Cloudflare Workers のURLへ書き換える
+    "OAUTH_ISSUER": "http://localhost:30002"
+  },
+  // Workers Logs を有効化（本番障害調査用）
+  "observability": {
+    "enabled": true
+  }
 }
