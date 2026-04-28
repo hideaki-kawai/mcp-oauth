@@ -11,6 +11,7 @@
     "format:check": "biome format .",
     "lint:check": "biome lint .",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "preinstall": "node -e \"const execPath = process.env.npm_execpath || ''; const isPnpm = execPath.includes('pnpm'); if (!isPnpm) { console.warn('\\n\\n⚠️  このプロジェクトはpnpmを使用することを推奨します。\\n    pnpm install を使用してください。\\n\\n'); }\""
   },
   "engines": {
@@ -22,7 +23,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
     "turbo": "^2.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.0"
   },
   "volta": {
     "node": "24.13.0"

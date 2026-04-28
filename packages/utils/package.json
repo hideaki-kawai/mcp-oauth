@@ -8,7 +8,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "biome lint .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "date-fns": "^4.1.0"
