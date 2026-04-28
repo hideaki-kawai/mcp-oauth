@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx",
+    "./dto": "./src/schemas/dto/index.ts"
+  },
   "scripts": {
     "dev": "vite --port 30001",
     "build": "vite build",
@@ -17,13 +23,17 @@
   },
   "dependencies": {
     "@hono/mcp": "^0.1.0",
+    "@hono/standard-validator": "^0.2.2",
+    "@hono/swagger-ui": "^0.6.1",
     "@mcp-oauth/constants": "workspace:*",
     "@mcp-oauth/database": "workspace:*",
     "@mcp-oauth/types": "workspace:*",
     "@mcp-oauth/utils": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "drizzle-orm": "^0.44.0",
-    "hono": "^4.12.15"
+    "hono": "^4.12.15",
+    "hono-openapi": "^1.3.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.2.3",

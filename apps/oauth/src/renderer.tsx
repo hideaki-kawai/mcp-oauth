@@ -3,7 +3,7 @@ import { Link, ViteClient } from 'vite-ssr-components/hono'
 
 export const renderer = jsxRenderer(({ children }) => {
   return (
-    <html>
+    <html lang="ja">
       <head>
         <ViteClient />
         <Link href="/src/style.css" rel="stylesheet" />
