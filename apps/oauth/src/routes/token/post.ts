@@ -56,6 +56,10 @@ const route = new Hono<AppEnv>().post(
   async (c) => {
     const body = c.req.valid('form')
 
+    // grant_type が authorization_code か refresh_token かで処理を分岐する。
+    // authorization_code: ユーザー認可後に受け取った認可コードを検証し、初回のトークンセットを発行する。
+    // refresh_token: 既存のリフレッシュトークンで新しいトークンセットに差し替える（Rotation）。
+    // 両者は入力パラメータも検証ロジックも異なるため、Service メソッドを分けている。
     if (body.grant_type === 'authorization_code') {
       const result = await TokenService.exchangeAuthorizationCode(
         c.env.DB_OAUTH,
@@ -77,7 +81,7 @@ const route = new Hono<AppEnv>().post(
       return c.json(result.data, 200)
     }
 
-    // refresh_token フロー
+    // ここに到達するのは grant_type=refresh_token のみ（zod の union で 2 種に限定済み）
     const result = await TokenService.refresh(
       c.env.DB_OAUTH,
       { refreshToken: body.refresh_token, clientId: body.client_id },
