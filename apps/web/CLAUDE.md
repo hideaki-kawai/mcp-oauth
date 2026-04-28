@@ -25,17 +25,17 @@ apps/web/app/
   root.tsx                     ← ルートレイアウト
   routes.ts                    ← React Router のルート定義
   routes/
-    login/                     ← /login（フェーズ 5-3）
-    auth/callback/             ← /auth/callback（フェーズ 5-3）
-    (private)/                 ← 認証必須ルート（フェーズ 5-3）
+    login/                     ← /login
+    auth/callback/             ← /auth/callback
+    (private)/                 ← 認証必須ルート
   shared/
     lib/
-      api.ts                   ← ✅ Hono RPC クライアント
-      pkce.ts                  ← ✅ PKCE / state 生成（フェーズ 1-3 で実装済み）
-      auth-store.ts            ← トークンメモリ管理（フェーズ 5-2）
+      api.ts                   ← Hono RPC クライアント
+      pkce.ts                  ← PKCE / state 生成
+      auth-store.ts            ← トークンメモリ管理
     middlewares/
-      auth-context.ts          ← createContext<AuthUser>（フェーズ 5-2）
-      auth-middleware.ts       ← clientMiddleware（フェーズ 5-2）
+      auth-context.ts          ← createContext<AuthUser>
+      auth-middleware.ts       ← clientMiddleware
 ```
 
 ## 規約
@@ -112,17 +112,6 @@ pnpm -F @mcp-oauth/web deploy
 ```
 
 `rm -rf .wrangler build` で古いアセットをクリーンしてから build & deploy する。
-
-## 実装フェーズ進捗
-
-| フェーズ | 内容 | 状態 |
-|---------|------|------|
-| 1-3 | shared/lib/pkce.ts | ✅ |
-| Hono RPC | shared/lib/api.ts | ✅ |
-| 5-2 | auth-store.ts / auth-context.ts / auth-middleware.ts | ⏳ |
-| 5-3 | /login / /auth/callback / (private)/* | ⏳ |
-
-進捗の詳細は `docs/07-implementation-plan.md` を参照。
 
 ## 関連ドキュメント
 

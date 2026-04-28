@@ -52,6 +52,7 @@ import { execSync } from 'node:child_process'
 import { unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { OAUTH_CLIENT_IDS } from '@mcp-oauth/constants'
 import { hashPassword } from '@mcp-oauth/utils'
 
 // ─────────────────────────────────────────────────────────
@@ -62,7 +63,7 @@ const ADMIN_USER_ID = 'seed-user-admin'
 const ADMIN_EMAIL = 'admin@example.com'
 const ADMIN_PASSWORD = 'password'
 
-const WEB_CLIENT_ID = 'web-client'
+const WEB_CLIENT_ID = OAUTH_CLIENT_IDS.WEB
 const WEB_CLIENT_NAME = 'web'
 // web フロントエンドの dev サーバーポート（apps/web/package.json の dev スクリプトと一致させる）
 const WEB_REDIRECT_URIS = ['http://localhost:30000/auth/callback']

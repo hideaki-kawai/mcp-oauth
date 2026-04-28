@@ -9,11 +9,16 @@
  */
 
 import { swaggerUI } from '@hono/swagger-ui'
+import { OAUTH_PATHS } from '@mcp-oauth/constants'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { openAPIRouteHandler } from 'hono-openapi'
 import { renderer } from './renderer'
+import authorizeRoute from './routes/authorize/get'
+import authorizeConsentRoute from './routes/authorize/consent/post'
+import authorizeLoginRoute from './routes/authorize/login/post'
 import registerRoute from './routes/register/post'
+import tokenRoute from './routes/token/post'
 import wellKnownRoute from './routes/well-known/get'
 import type { AppEnv } from './types'
 
@@ -52,7 +57,8 @@ app.get(
       tags: [
         { name: 'discovery', description: 'OAuth Discovery（メタデータ）' },
         { name: 'dcr', description: 'Dynamic Client Registration' },
-        // 今後追加: authorize / token 等
+        { name: 'authorize', description: 'ログイン・同意画面' },
+        { name: 'token', description: 'トークン発行・更新' },
       ],
     },
   }),
@@ -68,8 +74,12 @@ app.get('/docs', swaggerUI({ url: '/docs/openapi.json' }))
 app.get('/', (c) => c.render(<h1>OAuth Server</h1>))
 
 export const routes = app
-  .route('/.well-known', wellKnownRoute)
-  .route('/register', registerRoute)
+  .route(OAUTH_PATHS.WELL_KNOWN, wellKnownRoute)
+  .route(OAUTH_PATHS.REGISTER, registerRoute)
+  .route(OAUTH_PATHS.AUTHORIZE, authorizeRoute)
+  .route(OAUTH_PATHS.AUTHORIZE_LOGIN, authorizeLoginRoute)
+  .route(OAUTH_PATHS.AUTHORIZE_CONSENT, authorizeConsentRoute)
+  .route(OAUTH_PATHS.TOKEN, tokenRoute)
 
 export default app
 

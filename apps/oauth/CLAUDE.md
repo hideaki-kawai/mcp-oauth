@@ -25,14 +25,14 @@ apps/oauth/src/
   types.ts                 ← Bindings / Variables / AppEnv
   schemas/dto/             ← API リクエスト/レスポンスの zod スキーマ
   domains/
-    jwt/index.ts           ← ✅ JWT 生成・検証
+    jwt/index.ts           ← JWT 生成・検証
   libs/
     token.ts               ← 認可コード/リフレッシュトークン生成
   routes/
-    well-known/get.ts      ← ✅ GET /.well-known/oauth-authorization-server
-    register/              ← ✅ POST /register（DCR）
-    authorize/             ← GET /authorize / POST /authorize/login / consent（フェーズ 2-4〜6）
-    token/                 ← POST /token（フェーズ 2-7）
+    well-known/get.ts      ← GET /.well-known/oauth-authorization-server
+    register/              ← POST /register（DCR）
+    authorize/             ← GET /authorize / POST /authorize/login / consent
+    token/                 ← POST /token
 ```
 
 開発時に確認できる URL:
@@ -120,20 +120,6 @@ api-mcp と同じく:
 
 `@mcp-oauth/utils` の `hashPassword` / `verifyPassword`（PBKDF2 + SHA-256）を使う。
 シーダーと同じ実装を共有しているため、フォーマット差異が出ない。
-
-## 実装フェーズ進捗
-
-| フェーズ | 内容 | 状態 |
-|---------|------|------|
-| 2-1 | GET /.well-known/oauth-authorization-server | ✅ |
-| 2-2 | JWT 生成・検証（domains/jwt） | ✅ |
-| 2-3 | POST /register（DCR） | ✅ |
-| 2-4 | GET /authorize | ⏳ |
-| 2-5 | POST /authorize/login | ⏳ |
-| 2-6 | POST /authorize/consent | ⏳ |
-| 2-7 | POST /token（authorization_code / refresh_token） | ⏳ |
-
-進捗の詳細は `docs/07-implementation-plan.md` を参照。
 
 ## 関連ドキュメント
 

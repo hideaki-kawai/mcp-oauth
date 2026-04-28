@@ -187,6 +187,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@mcp-oauth/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@mcp-oauth/utils':
         specifier: workspace:*
         version: link:../utils

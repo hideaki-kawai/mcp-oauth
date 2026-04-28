@@ -20,6 +20,7 @@
     "db:seed:remote": "tsx src/seed/oauth.ts remote"
   },
   "dependencies": {
+    "@mcp-oauth/constants": "workspace:*",
     "@mcp-oauth/utils": "workspace:*",
     "drizzle-orm": "^0.44.0"
   },

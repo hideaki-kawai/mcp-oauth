@@ -30,7 +30,7 @@ import { authorizationServerMetadataSchema } from '../../schemas/dto'
 import type { AppEnv } from '../../types'
 
 const route = new Hono<AppEnv>().get(
-  '/oauth-authorization-server',
+  '/',
   describeRoute({
     tags: ['discovery'],
     summary: 'OAuth Authorization Server Metadata',

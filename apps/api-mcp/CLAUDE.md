@@ -31,12 +31,12 @@ apps/api-mcp/src/
   schemas/
     dto/                   ← API リクエスト/レスポンスの zod スキーマ（Web と共有）
   routes/
-    health/get.ts          ← ✅ GET /api/health（サンプル）
-    api/auth/              ← BFF: /api/auth/{token,refresh,logout}（フェーズ 5）
-    mcp/                   ← MCP プロトコル（フェーズ 3-3）
-    well-known/            ← /.well-known/oauth-protected-resource（フェーズ 3-1）
+    health/get.ts          ← GET /api/health（サンプル）
+    api/auth/              ← BFF: /api/auth/{token,refresh,logout}
+    mcp/                   ← MCP プロトコル
+    well-known/            ← /.well-known/oauth-protected-resource
   domains/
-    auth/middleware.ts     ← JWT 検証ミドルウェア（フェーズ 3-2）
+    auth/middleware.ts     ← JWT 検証ミドルウェア
 ```
 
 ## 規約
@@ -140,19 +140,6 @@ const res = await fetch('https://oauth.workers.dev/token', { ... })
 ```
 
 ローカル開発時も `wrangler dev` が自動でローカル oauth に繋いでくれる。
-
-## 実装フェーズ進捗
-
-| フェーズ | 内容 | 状態 |
-|---------|------|------|
-| 3-1 | GET /.well-known/oauth-protected-resource | ⏳ |
-| 3-2 | JWT 認証ミドルウェア | ⏳ |
-| 3-3 | GET/POST /mcp（@hono/mcp + MCP SDK） | ⏳ |
-| 5-1 | POST /api/auth/token | ⏳ |
-| 5-1 | POST /api/auth/refresh | ⏳ |
-| 5-1 | POST /api/auth/logout | ⏳ |
-
-進捗の詳細は `docs/07-implementation-plan.md` を参照。
 
 ## 関連ドキュメント
 
