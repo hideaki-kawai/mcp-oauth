@@ -214,19 +214,30 @@ pnpm -F @mcp-oauth/oauth db:migrate:local
 pnpm -F @mcp-oauth/database db:seed
 ```
 
-### 1-3. アプリ固有ユーティリティ（`libs/`）
+### 1-3. ユーティリティ
 
-各アプリ内の `libs/` ディレクトリに配置する。複数アプリで使うわけではないため `packages/utils` には入れない。
-（`packages/utils` は date-fns を使った日付処理など、複数アプリで本当に横断的に使うものだけ置く）
+配置場所の方針:
+- **`packages/utils/`** — 複数のパッケージ・アプリ間で共有するもの
+- **`apps/<app>/src/libs/`** — そのアプリ専用のもの
+
+**`packages/utils/src/`**
+
+| ファイル | 関数 | 説明 | 利用元 |
+|---------|------|------|------|
+| `password.ts` | `hashPassword(password)` | PBKDF2ハッシュ生成（`crypto.subtle`、Workers ネイティブ） | `apps/oauth`（ログイン）+ `packages/database`（シーダー） |
+| `password.ts` | `verifyPassword(password, hash)` | PBKDF2照合（`crypto.subtle`） | `apps/oauth`（ログイン） |
+| `date.ts` | (date-fns ラッパー等) | 日付処理 | 全アプリ |
+
+> シーダー（`packages/database/src/seed/oauth.ts`）が `hashPassword` を呼ぶ都合上、
+> apps/oauth の libs/ ではなく packages/utils に置く。
+> apps/oauth → packages/utils の依存は OK だが、その逆は不可なので。
 
 **`apps/oauth/src/libs/`**
 
 | ファイル | 関数 | 説明 |
 |---------|------|------|
-| `password.ts` | `hashPassword(password)` | PBKDF2ハッシュ生成（`crypto.subtle`、Workers ネイティブ） |
-| `password.ts` | `verifyPassword(password, hash)` | PBKDF2照合（`crypto.subtle`） |
-| `token.ts` | `generateAuthCode()` | 認可コード生成（`crypto.randomUUID()`） |
-| `token.ts` | `generateRefreshToken()` | リフレッシュトークン生成（`crypto.randomUUID()`） |
+| `token.ts` | `generateAuthCode()` | 認可コード生成（`crypto.getRandomValues()` 16 バイト → 32 文字 hex） |
+| `token.ts` | `generateRefreshToken()` | リフレッシュトークン生成（`crypto.getRandomValues()` 32 バイト → 64 文字 hex） |
 
 **`apps/web/app/shared/lib/`**
 
