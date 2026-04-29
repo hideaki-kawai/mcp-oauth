@@ -15,17 +15,14 @@ export class AuthLogoutService {
     refreshToken: string,
     oauthInternalUrl?: string
   ): Promise<Result<void>> {
-    const url = `${oauthInternalUrl ?? 'https://oauth'}${OAUTH_PATHS.REVOKE}`
-    const doFetch = oauthInternalUrl
-      ? (u: string, init: RequestInit) => fetch(u, init)
-      : (u: string, init: RequestInit) => oauthService.fetch(u, init)
+    const body = new URLSearchParams({ token: refreshToken }).toString()
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
 
     // OAuth サーバーの /revoke を呼び、リフレッシュトークンを失効させる
-    const res = await doFetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ token: refreshToken }).toString(),
-    }).catch((err: unknown): never => {
+    const res = await (oauthInternalUrl
+      ? fetch(`${oauthInternalUrl}${OAUTH_PATHS.REVOKE}`, { method: 'POST', headers, body })
+      : oauthService.fetch(`https://oauth${OAUTH_PATHS.REVOKE}`, { method: 'POST', headers, body })
+    ).catch((err: unknown): never => {
       throw new Error(err instanceof Error ? err.message : 'network error')
     })
 

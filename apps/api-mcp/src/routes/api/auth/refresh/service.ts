@@ -24,20 +24,17 @@ export class AuthRefreshService {
     refreshToken: string,
     oauthInternalUrl?: string
   ): Promise<Result<RefreshResult>> {
-    const url = `${oauthInternalUrl ?? 'https://oauth'}${OAUTH_PATHS.TOKEN}`
-    const doFetch = oauthInternalUrl
-      ? (u: string, init: RequestInit) => fetch(u, init)
-      : (u: string, init: RequestInit) => oauthService.fetch(u, init)
+    const body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: OAUTH_CLIENT_IDS.WEB,
+    }).toString()
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
 
-    const res = await doFetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: OAUTH_CLIENT_IDS.WEB,
-      }).toString(),
-    }).catch((err: unknown): never => {
+    const res = await (oauthInternalUrl
+      ? fetch(`${oauthInternalUrl}${OAUTH_PATHS.TOKEN}`, { method: 'POST', headers, body })
+      : oauthService.fetch(`https://oauth${OAUTH_PATHS.TOKEN}`, { method: 'POST', headers, body })
+    ).catch((err: unknown): never => {
       throw new Error(err instanceof Error ? err.message : 'network error')
     })
 
