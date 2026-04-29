@@ -32,6 +32,7 @@ export const oauthClients = sqliteTable('oauth_clients', {
     enum: ['none'],
   }).notNull(),
   scopes: text('scopes').notNull(), // スペース区切り（"read write"）
+  firstParty: integer('first_party', { mode: 'boolean' }).notNull().default(false), // true = 自分たちのアプリ（同意画面スキップ）
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 })
 

@@ -4,4 +4,10 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [cloudflare(), tailwindcss()],
+  server: {
+    cors: {
+      origin: true,
+      credentials: true,
+    },
+  },
 })

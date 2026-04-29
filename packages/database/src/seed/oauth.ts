@@ -88,21 +88,23 @@ interface SeedOAuthClient {
   name: string
   redirectUris: string[]
   scopes: string
+  firstParty: boolean
 }
 
 async function buildSql(admin: SeedAdminUser, client: SeedOAuthClient): Promise<string> {
   const passwordHash = await hashPassword(admin.password)
   const now = Math.floor(Date.now() / 1000)
   const redirectUrisJson = JSON.stringify(client.redirectUris)
+  const firstPartyInt = client.firstParty ? 1 : 0
 
   return [
     `-- 管理者ユーザー`,
     `INSERT OR REPLACE INTO users (id, email, password_hash, role, created_at, updated_at)`,
     `VALUES ('${admin.id}', '${escapeSql(admin.email)}', '${escapeSql(passwordHash)}', 'admin', ${now}, ${now});`,
     ``,
-    `-- Web クライアント（事前登録）`,
-    `INSERT OR REPLACE INTO oauth_clients (id, name, redirect_uris, token_endpoint_auth_method, scopes, created_at)`,
-    `VALUES ('${client.id}', '${escapeSql(client.name)}', '${escapeSql(redirectUrisJson)}', 'none', '${escapeSql(client.scopes)}', ${now});`,
+    `-- Web クライアント（事前登録・first_party）`,
+    `INSERT OR REPLACE INTO oauth_clients (id, name, redirect_uris, token_endpoint_auth_method, scopes, first_party, created_at)`,
+    `VALUES ('${client.id}', '${escapeSql(client.name)}', '${escapeSql(redirectUrisJson)}', 'none', '${escapeSql(client.scopes)}', ${firstPartyInt}, ${now});`,
     ``,
   ].join('\n')
 }
@@ -132,6 +134,7 @@ async function main() {
     name: WEB_CLIENT_NAME,
     redirectUris: WEB_REDIRECT_URIS,
     scopes: WEB_SCOPES,
+    firstParty: true,
   }
 
   const sql = await buildSql(admin, client)

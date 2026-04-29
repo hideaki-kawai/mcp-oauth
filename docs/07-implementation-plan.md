@@ -817,16 +817,69 @@ apps/web/app/routes/
 
 ### 5-4. ローカル動作確認
 
-```bash
-# OAuthサーバーとapi-mcpをローカル起動
-pnpm -F @mcp-oauth/oauth dev      # http://localhost:8787
-pnpm -F @mcp-oauth/api-mcp dev    # http://localhost:8788
+#### 事前準備（初回のみ）
 
-# webを起動
-pnpm -F @mcp-oauth/web dev        # http://localhost:5173
+**1. シークレット設定**
+
+```bash
+# apps/oauth/.dev.vars
+JWT_SECRET=<openssl rand -base64 32 で生成>
+
+# apps/api-mcp/.dev.vars
+JWT_SECRET=<oauth と同じ値>
 ```
 
-ブラウザで `http://localhost:5173` にアクセスし、OAuthフローが完結することを確認する。
+**2. ローカルDBのマイグレーション・シード**
+
+```bash
+# OAuthサーバーのDB
+pnpm -F @mcp-oauth/oauth db:migrate:local
+
+# api-mcpのDB
+pnpm -F @mcp-oauth/api-mcp db:migrate:local
+
+# 初期データ投入（admin@example.com / password + web-client）
+pnpm -F @mcp-oauth/database db:seed
+```
+
+**3. Webの環境変数**
+
+`apps/web/.env.local`（gitignore済み）を作成:
+
+```bash
+VITE_API_BASE_URL=http://localhost:30001
+VITE_OAUTH_BASE_URL=http://localhost:30002
+VITE_WEB_BASE_URL=http://localhost:30000
+```
+
+#### サーバー起動
+
+```bash
+pnpm dev
+# 全アプリ同時起動:
+#   web      → http://localhost:30000
+#   api-mcp  → http://localhost:30001
+#   oauth    → http://localhost:30002
+```
+
+#### 動作確認フロー
+
+1. ブラウザで `http://localhost:30000` を開く
+2. `/login` へリダイレクトされ、さらに OAuth サーバーのログイン画面へ飛ぶ
+3. `admin@example.com` / `password` でログイン
+4. 同意画面で「許可する」をクリック
+5. `/auth/callback` でトークン取得 → `/` （ホーム画面）へリダイレクト
+6. ホーム画面に「ログイン中: admin@example.com」と USD/JPY・BTC/USD が表示されれば成功
+
+#### DBのリセット（やり直したい時）
+
+```bash
+rm -rf apps/oauth/.wrangler/state/v3/d1
+rm -rf apps/api-mcp/.wrangler/state/v3/d1
+pnpm -F @mcp-oauth/oauth db:migrate:local
+pnpm -F @mcp-oauth/api-mcp db:migrate:local
+pnpm -F @mcp-oauth/database db:seed
+```
 
 ### 5-5. Cloudflareデプロイ（web）
 

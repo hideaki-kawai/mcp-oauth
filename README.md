@@ -20,25 +20,77 @@ packages/
   utils/      - 共通ユーティリティ（複数アプリ横断のみ）
 ```
 
-## セットアップ
+## ローカル開発セットアップ
+
+### 1. 依存パッケージインストール
 
 ```bash
 pnpm install
-
-# JWT_SECRET を設定（apps/oauth/.dev.vars と apps/api-mcp/.dev.vars に同じ値を記載）
-# JWT_SECRET=<openssl rand -base64 32 で生成>
-
-# DBマイグレーション生成 → ローカル適用
-pnpm -F @mcp-oauth/database db:generate:oauth
-pnpm -F @mcp-oauth/database db:generate:mcp
-pnpm -F @mcp-oauth/oauth db:migrate:local
-pnpm -F @mcp-oauth/api-mcp db:migrate:local
-
-# シード投入
-pnpm -F @mcp-oauth/database db:seed
-
-pnpm dev
 ```
+
+### 2. シークレット設定
+
+`apps/oauth/.dev.vars` と `apps/api-mcp/.dev.vars` を作成する（gitignore済み）。
+両ファイルに **同じ** `JWT_SECRET` を設定すること。
+
+```bash
+# JWT_SECRET を生成してコピーする
+openssl rand -base64 32
+```
+
+```bash
+# apps/oauth/.dev.vars
+JWT_SECRET=<上で生成した値>
+
+# apps/api-mcp/.dev.vars
+JWT_SECRET=<同じ値>
+```
+
+### 3. ローカルDBのマイグレーション
+
+```bash
+# OAuthサーバーのDB（users / oauth_clients / authorization_codes / refresh_tokens）
+pnpm -F @mcp-oauth/oauth db:migrate:local
+
+# api-mcpのDB
+pnpm -F @mcp-oauth/api-mcp db:migrate:local
+```
+
+> マイグレーションSQLが存在しない場合は先に生成する:
+> ```bash
+> pnpm -F @mcp-oauth/database db:generate:oauth
+> pnpm -F @mcp-oauth/database db:generate:mcp
+> ```
+
+### 4. 初期データ投入（シード）
+
+```bash
+pnpm -F @mcp-oauth/database db:seed
+# 投入される内容:
+#   ユーザー: admin@example.com / password
+#   OAuthクライアント: web-client
+```
+
+### 5. Web の環境変数
+
+`apps/web/.env.local` を作成する（gitignore済み）:
+
+```bash
+VITE_API_BASE_URL=http://localhost:30001
+VITE_OAUTH_BASE_URL=http://localhost:30002
+VITE_WEB_BASE_URL=http://localhost:30000
+```
+
+### 6. 起動
+
+```bash
+pnpm dev
+# web      → http://localhost:30000
+# api-mcp  → http://localhost:30001
+# oauth    → http://localhost:30002
+```
+
+ブラウザで `http://localhost:30000` を開き、`admin@example.com` / `password` でログインできれば完了。
 
 ## コマンド
 

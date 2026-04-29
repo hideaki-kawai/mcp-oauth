@@ -1,0 +1,1 @@
+ALTER TABLE `oauth_clients` ADD `first_party` integer DEFAULT false NOT NULL;
