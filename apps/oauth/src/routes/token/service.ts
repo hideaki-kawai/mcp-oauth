@@ -188,9 +188,23 @@ async function issueTokens(
   jwtSecret: string,
   input: { userId: string; clientId: string; scopes: string }
 ): Promise<Result<TokenResponse>> {
+  // ユーザーのメールアドレスを取得（JWT に含めるため）
+  const userResult = await TokenRepository.findUserById(d1, input.userId)
+  if (!userResult.success) {
+    return { success: false, data: null, error: userResult.error }
+  }
+  if (!userResult.data) {
+    return { success: false, data: null, error: 'user not found' }
+  }
+
   // アクセストークン（5 分）
   const accessToken = await JwtDomain.signAccessToken(
-    { sub: input.userId, clientId: input.clientId, scope: input.scopes },
+    {
+      sub: input.userId,
+      email: userResult.data.email,
+      clientId: input.clientId,
+      scope: input.scopes,
+    },
     jwtSecret
   )
 

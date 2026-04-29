@@ -1,36 +1,34 @@
 /**
- * アクセストークンのメモリ管理
+ * アクセストークンとユーザー情報のメモリ管理
  *
- * - 本来はメモリ変数のみで保持する設計（XSS リスク軽減）
- * - フェーズ 5 の認証フロー実装前は sessionStorage にも保存して
- *   ページリロードしてもトークン入力をやり直さなくて済むようにする
- *   （開発用便宜措置。フェーズ 5 で sessionStorage 保存は削除予定）
+ * - メモリ変数のみで保持する（XSS リスク軽減）
+ * - ページリロードで消える → /api/auth/refresh で自動復元される（httpOnly Cookie 経由）
+ * - リフレッシュトークンは httpOnly Cookie に格納されているため
+ *   JS から直接触れない（api-mcp BFF が管理する）
  *
  * @see docs/03-endpoints.md「アクセストークン管理（SPA: authStore）」
  */
 
-const SESSION_KEY = 'devAccessToken'
+export type AuthUser = {
+  id: string
+  email: string
+}
 
 let accessToken: string | null = null
-
-// 初回読み込み時に sessionStorage から復元
-if (typeof window !== 'undefined') {
-  accessToken = sessionStorage.getItem(SESSION_KEY)
-}
+let currentUser: AuthUser | null = null
 
 export const authStore = {
   getToken: (): string | null => accessToken,
 
-  setToken: (token: string | null): void => {
+  getUser: (): AuthUser | null => currentUser,
+
+  setToken: (token: string, user: AuthUser): void => {
     accessToken = token
-    if (typeof window !== 'undefined') {
-      if (token === null) sessionStorage.removeItem(SESSION_KEY)
-      else sessionStorage.setItem(SESSION_KEY, token)
-    }
+    currentUser = user
   },
 
   clearToken: (): void => {
     accessToken = null
-    if (typeof window !== 'undefined') sessionStorage.removeItem(SESSION_KEY)
+    currentUser = null
   },
 }

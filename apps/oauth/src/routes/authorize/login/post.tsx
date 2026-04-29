@@ -65,7 +65,7 @@ const route = new Hono<AppEnv>().post(
 
     if (!result.success) {
       // 失敗 → ログイン画面再表示（OAuth パラメータは保持）
-      return c.html(<LoginScreen query={form} errorMessage={result.error} />)
+      return c.render(<LoginScreen query={form} errorMessage={result.error} />)
     }
 
     // 成功 → OAuth セッション JWT を発行して Cookie へ

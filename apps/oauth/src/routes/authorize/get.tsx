@@ -49,7 +49,8 @@ const route = new Hono<AppEnv>().get(
           return path ? `${path}: ${issue.message}` : issue.message
         })
         .join(', ')
-      return c.html(<ErrorScreen title="リクエストが不正です" message={detail} />, 400)
+      c.status(400)
+      return c.render(<ErrorScreen title="リクエストが不正です" message={detail} />)
     }
   }),
   async (c) => {
@@ -64,7 +65,8 @@ const route = new Hono<AppEnv>().get(
           : validation.errorCode === 'invalid_redirect_uri'
             ? 'リダイレクト先が登録と一致しません'
             : 'サーバーエラー'
-      return c.html(<ErrorScreen title={title} message={validation.error} />, 400)
+      c.status(400)
+      return c.render(<ErrorScreen title={title} message={validation.error} />)
     }
 
     const { client } = validation.data
@@ -84,10 +86,10 @@ const route = new Hono<AppEnv>().get(
 
     // 3. 画面振り分け
     if (!isLoggedIn) {
-      return c.html(<LoginScreen query={query} />)
+      return c.render(<LoginScreen query={query} />)
     }
 
-    return c.html(
+    return c.render(
       <ConsentScreen query={query} clientName={client.name} fallbackScope={client.scopes} />
     )
   }

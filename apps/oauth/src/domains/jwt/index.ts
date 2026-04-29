@@ -41,6 +41,8 @@ const OAUTH_SESSION_EXPIRES_IN_SEC = 7 * 24 * 60 * 60
 export type AccessTokenPayload = {
   /** ユーザー ID */
   sub: string
+  /** ユーザーのメールアドレス（BFF がユーザー情報を返すために含める） */
+  email: string
   /** OAuth クライアント ID */
   client_id: string
   /** 許可されたスコープ（スペース区切り） */
@@ -70,6 +72,7 @@ export type OAuthSessionPayload = {
 
 type SignAccessTokenInput = {
   sub: string
+  email: string
   clientId: string
   scope: string
 }
@@ -91,6 +94,7 @@ export class JwtDomain {
     const now = Math.floor(Date.now() / 1000)
     const payload: AccessTokenPayload = {
       sub: input.sub,
+      email: input.email,
       client_id: input.clientId,
       scope: input.scope,
       type: 'access',

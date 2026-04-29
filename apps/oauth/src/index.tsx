@@ -19,6 +19,7 @@ import authorizeConsentRoute from './routes/authorize/consent/post'
 import authorizeLoginRoute from './routes/authorize/login/post'
 import registerRoute from './routes/register/post'
 import tokenRoute from './routes/token/post'
+import revokeRoute from './routes/revoke/post'
 import wellKnownRoute from './routes/well-known/get'
 import type { AppEnv } from './types'
 
@@ -80,6 +81,7 @@ export const routes = app
   .route(OAUTH_PATHS.AUTHORIZE_LOGIN, authorizeLoginRoute)
   .route(OAUTH_PATHS.AUTHORIZE_CONSENT, authorizeConsentRoute)
   .route(OAUTH_PATHS.TOKEN, tokenRoute)
+  .route(OAUTH_PATHS.REVOKE, revokeRoute)
 
 export default app
 

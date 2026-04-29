@@ -41,7 +41,8 @@ const route = new Hono<AppEnv>().post(
   }),
   validator('form', authorizeConsentFormSchema, (result, c) => {
     if (!result.success) {
-      return c.html(<ErrorScreen title="リクエストが不正です" message="不足/不正なフォーム" />, 400)
+      c.status(400)
+      return c.render(<ErrorScreen title="リクエストが不正です" message="不足/不正なフォーム" />)
     }
   }),
   async (c) => {
@@ -50,9 +51,9 @@ const route = new Hono<AppEnv>().post(
     // 1. OAuth セッション Cookie 検証
     const cookie = getCookie(c, OAUTH_COOKIES.SESSION)
     if (!cookie) {
-      return c.html(
-        <ErrorScreen title="ログインが必要です" message="ログイン画面からやり直してください" />,
-        401
+      c.status(401)
+      return c.render(
+        <ErrorScreen title="ログインが必要です" message="ログイン画面からやり直してください" />
       )
     }
     let userId: string
@@ -60,9 +61,9 @@ const route = new Hono<AppEnv>().post(
       const session = await JwtDomain.verifyOAuthSession(cookie, c.env.JWT_SECRET)
       userId = session.sub
     } catch {
-      return c.html(
-        <ErrorScreen title="セッションが無効です" message="再ログインしてください" />,
-        401
+      c.status(401)
+      return c.render(
+        <ErrorScreen title="セッションが無効です" message="再ログインしてください" />
       )
     }
 
@@ -75,7 +76,8 @@ const route = new Hono<AppEnv>().post(
           : result.errorCode === 'invalid_redirect_uri'
             ? 'リダイレクト先が登録と一致しません'
             : 'サーバーエラー'
-      return c.html(<ErrorScreen title={title} message={result.error} />, 400)
+      c.status(400)
+      return c.render(<ErrorScreen title={title} message={result.error} />)
     }
 
     // 3. redirect_uri へ 303 リダイレクト

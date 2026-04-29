@@ -8,3 +8,9 @@ export const OAUTH_CLIENT_IDS = {
   /** Web SPA（事前登録、シーダーで投入） */
   WEB: 'web-client',
 } as const
+
+/** OAuth スコープ定数 */
+export const OAUTH_SCOPES = {
+  /** Web SPA が要求するスコープ */
+  WEB: 'read write',
+} as const

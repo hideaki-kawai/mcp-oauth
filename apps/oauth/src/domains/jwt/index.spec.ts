@@ -8,7 +8,7 @@ const OTHER_SECRET = 'other-secret-' + 'y'.repeat(32)
 describe('JwtDomain.signAccessToken', () => {
   it('iat / exp / sub / client_id / scope / type を含む有効な JWT を返す', async () => {
     const token = await JwtDomain.signAccessToken(
-      { sub: 'user-1', clientId: 'client-1', scope: 'read write' },
+      { sub: 'user-1', email: 'user1@example.com', clientId: 'client-1', scope: 'read write' },
       SECRET
     )
 
@@ -28,7 +28,7 @@ describe('JwtDomain.signAccessToken', () => {
     vi.setSystemTime(new Date('2026-04-29T00:00:00Z'))
 
     const token = await JwtDomain.signAccessToken(
-      { sub: 'user-1', clientId: 'client-1', scope: 'read' },
+      { sub: 'user-1', email: 'user1@example.com', clientId: 'client-1', scope: 'read' },
       SECRET
     )
     const { payload } = decode(token)
@@ -83,7 +83,7 @@ describe('JwtDomain.verifyOAuthSession (異常系)', () => {
 
   it('アクセストークン（type=access）を拒否する — 誤流入の防止', async () => {
     const accessToken = await JwtDomain.signAccessToken(
-      { sub: 'user-1', clientId: 'client-1', scope: 'read' },
+      { sub: 'user-1', email: 'user1@example.com', clientId: 'client-1', scope: 'read' },
       SECRET
     )
     await expect(JwtDomain.verifyOAuthSession(accessToken, SECRET)).rejects.toThrow(

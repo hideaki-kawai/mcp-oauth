@@ -47,6 +47,11 @@ describe('TokenService.exchangeAuthorizationCode', () => {
       data: undefined,
       error: null,
     })
+    vi.spyOn(TokenRepository, 'findUserById').mockResolvedValue({
+      success: true,
+      data: { id: 'u1', email: 'u1@example.com' },
+      error: null,
+    })
     const insertSpy = vi.spyOn(TokenRepository, 'createRefreshToken').mockResolvedValue({
       success: true,
       data: undefined,
@@ -99,6 +104,11 @@ describe('TokenService.exchangeAuthorizationCode', () => {
     vi.spyOn(TokenRepository, 'markAuthCodeUsed').mockResolvedValue({
       success: true,
       data: undefined,
+      error: null,
+    })
+    vi.spyOn(TokenRepository, 'findUserById').mockResolvedValue({
+      success: true,
+      data: { id: 'u1', email: 'u1@example.com' },
       error: null,
     })
     const insertSpy = vi.spyOn(TokenRepository, 'createRefreshToken').mockResolvedValue({
@@ -233,6 +243,11 @@ describe('TokenService.refresh (Rotation)', () => {
     const revokeSpy = vi.spyOn(TokenRepository, 'revokeRefreshToken').mockResolvedValue({
       success: true,
       data: undefined,
+      error: null,
+    })
+    vi.spyOn(TokenRepository, 'findUserById').mockResolvedValue({
+      success: true,
+      data: { id: 'u1', email: 'u1@example.com' },
       error: null,
     })
     const insertSpy = vi.spyOn(TokenRepository, 'createRefreshToken').mockResolvedValue({

@@ -6,7 +6,7 @@
  *   - refresh_tokens:      検索 / 失効 / 新規発行
  */
 
-import { authorizationCodes, refreshTokens } from '@mcp-oauth/database/oauth'
+import { authorizationCodes, refreshTokens, users } from '@mcp-oauth/database/oauth'
 import type { Result } from '@mcp-oauth/types'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
@@ -42,6 +42,26 @@ export type CreateRefreshTokenInput = {
 }
 
 export class TokenRepository {
+  // ── users ────────────────────────────────────────
+
+  static async findUserById(
+    d1: D1Database,
+    userId: string
+  ): Promise<Result<{ id: string; email: string } | null>> {
+    try {
+      const db = drizzle(d1)
+      const rows = await db
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1)
+      if (rows.length === 0) return { success: true, data: null, error: null }
+      return { success: true, data: rows[0], error: null }
+    } catch (err) {
+      return { success: false, data: null, error: errMsg(err) }
+    }
+  }
+
   // ── authorization_codes ──────────────────────────
 
   static async findAuthCode(d1: D1Database, code: string): Promise<Result<AuthCodeRow | null>> {
