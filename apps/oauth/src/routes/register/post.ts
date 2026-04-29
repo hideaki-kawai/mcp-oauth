@@ -15,11 +15,7 @@
 
 import { Hono } from 'hono'
 import { describeRoute, resolver, validator } from 'hono-openapi'
-import {
-  oauthErrorSchema,
-  registerRequestSchema,
-  registerResponseSchema,
-} from '../../schemas/dto'
+import { oauthErrorSchema, registerRequestSchema, registerResponseSchema } from '../../schemas/dto'
 import type { AppEnv } from '../../types'
 import { RegisterService } from './service'
 
@@ -54,12 +50,14 @@ const route = new Hono<AppEnv>().post(
           error: 'invalid_client_metadata',
           error_description: result.error
             .map((issue) => {
-              const path = (issue.path ?? []).map((p) => (typeof p === 'object' ? p.key : p)).join('.')
+              const path = (issue.path ?? [])
+                .map((p) => (typeof p === 'object' ? p.key : p))
+                .join('.')
               return path ? `${path}: ${issue.message}` : issue.message
             })
             .join(', '),
         },
-        400,
+        400
       )
     }
   }),
@@ -73,12 +71,12 @@ const route = new Hono<AppEnv>().post(
           error: 'invalid_client_metadata',
           error_description: result.error,
         },
-        400,
+        400
       )
     }
 
     return c.json(result.data, 201)
-  },
+  }
 )
 
 export default route

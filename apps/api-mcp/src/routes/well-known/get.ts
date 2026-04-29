@@ -34,7 +34,7 @@ const route = new Hono<AppEnv>().get(
       bearer_methods_supported: ['header'] as const,
       scopes_supported: ['read', 'write'],
     })
-  },
+  }
 )
 
 export default route

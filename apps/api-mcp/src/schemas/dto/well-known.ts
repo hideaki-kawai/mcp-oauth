@@ -19,6 +19,4 @@ export const oauthProtectedResourceMetadataSchema = z.object({
   scopes_supported: z.array(z.string()),
 })
 
-export type OAuthProtectedResourceMetadata = z.infer<
-  typeof oauthProtectedResourceMetadataSchema
->
+export type OAuthProtectedResourceMetadata = z.infer<typeof oauthProtectedResourceMetadataSchema>

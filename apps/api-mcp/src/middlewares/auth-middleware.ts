@@ -67,10 +67,7 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
  *
  * MCP 仕様（Authorization Spec）に従い、resource_metadata で discovery URL を示す。
  */
-function unauthorized(
-  c: Parameters<MiddlewareHandler<AppEnv>>[0],
-  description: string,
-) {
+function unauthorized(c: Parameters<MiddlewareHandler<AppEnv>>[0], description: string) {
   const resourceMetadata = `${c.env.API_MCP_BASE_URL}/.well-known/oauth-protected-resource`
   c.header('WWW-Authenticate', `Bearer resource_metadata="${resourceMetadata}"`)
   return c.json({ error: 'unauthorized', error_description: description }, 401)

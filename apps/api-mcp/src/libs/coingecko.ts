@@ -55,7 +55,7 @@ export function symbolToId(symbol: string): string {
   const id = SYMBOL_TO_ID[symbol.toUpperCase()]
   if (!id) {
     throw new Error(
-      `unsupported crypto symbol: ${symbol}. Supported: ${Object.keys(SYMBOL_TO_ID).join(', ')}`,
+      `unsupported crypto symbol: ${symbol}. Supported: ${Object.keys(SYMBOL_TO_ID).join(', ')}`
     )
   }
   return id

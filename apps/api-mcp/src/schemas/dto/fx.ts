@@ -12,7 +12,10 @@ import { z } from 'zod'
 // ─────────────────────────────────────────────────────────
 
 /** 通貨コード（ISO 4217 を想定。3 文字英大文字） */
-const currencyCodeSchema = z.string().length(3).regex(/^[A-Za-z]{3}$/, '3 文字の英字')
+const currencyCodeSchema = z
+  .string()
+  .length(3)
+  .regex(/^[A-Za-z]{3}$/, '3 文字の英字')
 
 export const getFxRateQuerySchema = z.object({
   from: currencyCodeSchema.describe('変換元通貨コード（例: USD）'),

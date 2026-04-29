@@ -33,7 +33,7 @@ export class AuthorizeService {
    */
   static async validate(
     d1: D1Database,
-    query: AuthorizeQuery,
+    query: AuthorizeQuery
   ): Promise<Result<AuthorizeValidationOk> & { errorCode?: AuthorizeError }> {
     // 1. client_id を DB で検索
     const clientResult = await AuthorizeRepository.findClientById(d1, query.client_id)

@@ -49,7 +49,7 @@ const route = new Hono<AppEnv>().post(
             })
             .join(', '),
         },
-        400,
+        400
       )
     }
   }),
@@ -69,13 +69,13 @@ const route = new Hono<AppEnv>().post(
           clientId: body.client_id,
           codeVerifier: body.code_verifier,
         },
-        c.env.JWT_SECRET,
+        c.env.JWT_SECRET
       )
 
       if (!result.success) {
         return c.json(
           { error: result.errorCode ?? 'invalid_request', error_description: result.error },
-          400,
+          400
         )
       }
       return c.json(result.data, 200)
@@ -85,17 +85,17 @@ const route = new Hono<AppEnv>().post(
     const result = await TokenService.refresh(
       c.env.DB_OAUTH,
       { refreshToken: body.refresh_token, clientId: body.client_id },
-      c.env.JWT_SECRET,
+      c.env.JWT_SECRET
     )
 
     if (!result.success) {
       return c.json(
         { error: result.errorCode ?? 'invalid_request', error_description: result.error },
-        400,
+        400
       )
     }
     return c.json(result.data, 200)
-  },
+  }
 )
 
 export default route

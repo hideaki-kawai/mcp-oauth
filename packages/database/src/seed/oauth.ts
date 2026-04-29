@@ -90,10 +90,7 @@ interface SeedOAuthClient {
   scopes: string
 }
 
-async function buildSql(
-  admin: SeedAdminUser,
-  client: SeedOAuthClient,
-): Promise<string> {
+async function buildSql(admin: SeedAdminUser, client: SeedOAuthClient): Promise<string> {
   const passwordHash = await hashPassword(admin.password)
   const now = Math.floor(Date.now() / 1000)
   const redirectUrisJson = JSON.stringify(client.redirectUris)

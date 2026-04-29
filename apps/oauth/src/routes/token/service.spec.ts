@@ -61,7 +61,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
         clientId: 'web-client',
         codeVerifier: verifier,
       },
-      SECRET,
+      SECRET
     )
 
     expect(result.success).toBe(true)
@@ -115,7 +115,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
         clientId: 'random-uuid-from-dcr',
         codeVerifier: verifier,
       },
-      SECRET,
+      SECRET
     )
 
     expect(insertSpy.mock.calls[0][1].type).toBe('mcp')
@@ -130,7 +130,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
     const result = await TokenService.exchangeAuthorizationCode(
       fakeD1,
       { code: 'x', redirectUri: 'r', clientId: 'c', codeVerifier: 'v' },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -155,7 +155,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
     const result = await TokenService.exchangeAuthorizationCode(
       fakeD1,
       { code: 'used', redirectUri: 'r', clientId: 'web-client', codeVerifier: verifier },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -181,7 +181,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
     const result = await TokenService.exchangeAuthorizationCode(
       fakeD1,
       { code: 'expired', redirectUri: 'r', clientId: 'web-client', codeVerifier: verifier },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -207,7 +207,7 @@ describe('TokenService.exchangeAuthorizationCode', () => {
     const result = await TokenService.exchangeAuthorizationCode(
       fakeD1,
       { code: 'c', redirectUri: 'r', clientId: 'web-client', codeVerifier: 'WRONG-VERIFIER' },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -244,7 +244,7 @@ describe('TokenService.refresh (Rotation)', () => {
     const result = await TokenService.refresh(
       fakeD1,
       { refreshToken: 'old-token', clientId: 'web-client' },
-      SECRET,
+      SECRET
     )
 
     expect(result.success).toBe(true)
@@ -272,7 +272,7 @@ describe('TokenService.refresh (Rotation)', () => {
     const result = await TokenService.refresh(
       fakeD1,
       { refreshToken: 'rev', clientId: 'web-client' },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -297,7 +297,7 @@ describe('TokenService.refresh (Rotation)', () => {
     const result = await TokenService.refresh(
       fakeD1,
       { refreshToken: 'old', clientId: 'web-client' },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return
@@ -322,7 +322,7 @@ describe('TokenService.refresh (Rotation)', () => {
     const result = await TokenService.refresh(
       fakeD1,
       { refreshToken: 'old', clientId: 'attacker-client' },
-      SECRET,
+      SECRET
     )
     expect(result.success).toBe(false)
     if (result.success) return

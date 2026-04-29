@@ -40,7 +40,7 @@ const route = new Hono<AppEnv>().get(
       timestamp: Math.floor(Date.now() / 1000),
       environment: c.env.ENVIRONMENT,
     })
-  },
+  }
 )
 
 export default route

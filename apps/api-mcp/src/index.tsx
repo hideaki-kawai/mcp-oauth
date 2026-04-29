@@ -43,7 +43,7 @@ app.use(
   cors({
     origin: (origin) => origin ?? 'http://localhost:30000',
     credentials: true,
-  }),
+  })
 )
 
 // ─────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ app.get(
         },
       },
     },
-  }),
+  })
 )
 
 // Swagger UI（GET /docs で開ける）

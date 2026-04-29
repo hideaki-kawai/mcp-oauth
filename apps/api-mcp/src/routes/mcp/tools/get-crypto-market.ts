@@ -16,10 +16,7 @@ export const getCryptoMarketConfig = {
   },
 }
 
-export async function getCryptoMarketHandler(input: {
-  symbol: string
-  vsCurrency: string
-}) {
+export async function getCryptoMarketHandler(input: { symbol: string; vsCurrency: string }) {
   const result = await CryptoDomain.getMarket(input)
 
   const lines = [

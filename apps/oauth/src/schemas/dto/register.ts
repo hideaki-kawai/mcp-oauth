@@ -23,7 +23,10 @@ export const registerRequestSchema = z
   .object({
     redirect_uris: z.array(z.string().min(1)).min(1, 'redirect_uris must have at least 1 entry'),
     client_name: z.string().min(1).optional(),
-    grant_types: z.array(z.enum(['authorization_code', 'refresh_token'])).min(1).optional(),
+    grant_types: z
+      .array(z.enum(['authorization_code', 'refresh_token']))
+      .min(1)
+      .optional(),
     response_types: z.array(z.literal('code')).min(1).optional(),
     token_endpoint_auth_method: z.literal('none').optional(),
     scope: z.string().optional(),

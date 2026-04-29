@@ -39,7 +39,7 @@ export type ConsentErrorCode = 'invalid_client' | 'invalid_redirect_uri' | 'serv
 export class ConsentService {
   static async handle(
     d1: D1Database,
-    input: ConsentInput,
+    input: ConsentInput
   ): Promise<Result<ConsentOk> & { errorCode?: ConsentErrorCode }> {
     const { form, userId } = input
 
@@ -69,7 +69,12 @@ export class ConsentService {
     if (form.action === 'deny') {
       return {
         success: true,
-        data: { redirectUrl: buildRedirectUrl(form.redirect_uri, { error: 'access_denied', state: form.state }) },
+        data: {
+          redirectUrl: buildRedirectUrl(form.redirect_uri, {
+            error: 'access_denied',
+            state: form.state,
+          }),
+        },
         error: null,
       }
     }
@@ -100,10 +105,7 @@ export class ConsentService {
 }
 
 /** クエリパラメータを付与した URL を組み立てる */
-function buildRedirectUrl(
-  base: string,
-  params: Record<string, string | undefined>,
-): string {
+function buildRedirectUrl(base: string, params: Record<string, string | undefined>): string {
   const url = new URL(base)
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined) url.searchParams.set(k, v)

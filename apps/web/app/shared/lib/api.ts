@@ -40,7 +40,7 @@ export type ApiClient = ReturnType<typeof hc<AppType>>
  * - アクセストークンは将来 authStore から動的に注入する（フェーズ5 で実装）
  */
 export const api: ApiClient = hc<AppType>(API_BASE_URL, {
-  fetch: (input, init) =>
+  fetch: (input: RequestInfo | URL, init?: RequestInit) =>
     fetch(input as RequestInfo, {
       ...init,
       credentials: 'include',

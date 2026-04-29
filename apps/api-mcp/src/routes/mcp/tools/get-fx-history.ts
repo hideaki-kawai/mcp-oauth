@@ -17,11 +17,7 @@ export const getFxHistoryConfig = {
   },
 }
 
-export async function getFxHistoryHandler(input: {
-  from: string
-  to: string
-  days: number
-}) {
+export async function getFxHistoryHandler(input: { from: string; to: string; days: number }) {
   const result = await FxDomain.getHistory(input)
 
   const summary =

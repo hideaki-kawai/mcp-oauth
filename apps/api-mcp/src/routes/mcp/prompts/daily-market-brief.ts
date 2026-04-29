@@ -46,4 +46,4 @@ function promptText(focus: string) {
 3. \`get_fx_rate\` で USD/JPY と EUR/USD の最新レートを取得${focus}
 4. 取得した数値を整理し、目立つ動き・注目ポイントがあれば指摘
 5. 全体を 5 行程度で簡潔に報告（数字は読みやすい桁区切りで）`
-} 
+}

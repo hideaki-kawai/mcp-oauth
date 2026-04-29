@@ -31,7 +31,7 @@ const route = new Hono<AppEnv>().get(
     const { amount, from, to } = c.req.valid('query')
     const data = await FxDomain.convert({ amount, from, to })
     return c.json(data)
-  },
+  }
 )
 
 export default route

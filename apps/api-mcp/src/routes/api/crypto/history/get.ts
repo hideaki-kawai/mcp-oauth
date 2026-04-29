@@ -31,7 +31,7 @@ const route = new Hono<AppEnv>().get(
     const { symbol, vsCurrency, days } = c.req.valid('query')
     const data = await CryptoDomain.getHistory({ symbol, vsCurrency, days })
     return c.json(data)
-  },
+  }
 )
 
 export default route

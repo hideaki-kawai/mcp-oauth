@@ -16,10 +16,7 @@ export const getCryptoPriceConfig = {
   },
 }
 
-export async function getCryptoPriceHandler(input: {
-  symbol: string
-  vsCurrency: string
-}) {
+export async function getCryptoPriceHandler(input: { symbol: string; vsCurrency: string }) {
   const result = await CryptoDomain.getPrice(input)
   return {
     content: [

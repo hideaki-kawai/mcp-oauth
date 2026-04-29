@@ -74,11 +74,7 @@ export class FxDomain {
   /**
    * 期間指定で為替推移を取得（過去 days 日分）
    */
-  static async getHistory(input: {
-    from: string
-    to: string
-    days: number
-  }): Promise<FxHistory> {
+  static async getHistory(input: { from: string; to: string; days: number }): Promise<FxHistory> {
     const from = input.from.toUpperCase()
     const to = input.to.toUpperCase()
 
@@ -101,4 +97,3 @@ export class FxDomain {
     }
   }
 }
-

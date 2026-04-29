@@ -90,7 +90,7 @@ export class TokenRepository {
 
   static async findRefreshToken(
     d1: D1Database,
-    token: string,
+    token: string
   ): Promise<Result<RefreshTokenRow | null>> {
     try {
       const db = drizzle(d1)
@@ -134,7 +134,7 @@ export class TokenRepository {
 
   static async createRefreshToken(
     d1: D1Database,
-    input: CreateRefreshTokenInput,
+    input: CreateRefreshTokenInput
   ): Promise<Result<void>> {
     try {
       const db = drizzle(d1)

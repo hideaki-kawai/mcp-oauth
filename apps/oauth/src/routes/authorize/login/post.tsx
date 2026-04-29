@@ -16,10 +16,7 @@ import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { describeRoute, validator } from 'hono-openapi'
 import { JwtDomain } from '../../../domains/jwt'
-import {
-  type AuthorizeLoginForm,
-  authorizeLoginFormSchema,
-} from '../../../schemas/dto'
+import { type AuthorizeLoginForm, authorizeLoginFormSchema } from '../../../schemas/dto'
 import type { AppEnv } from '../../../types'
 import { LoginScreen } from '../views'
 import { LoginService } from './service'
@@ -74,7 +71,7 @@ const route = new Hono<AppEnv>().post(
     // 成功 → OAuth セッション JWT を発行して Cookie へ
     const sessionJwt = await JwtDomain.signOAuthSession(
       { sub: result.data.userId },
-      c.env.JWT_SECRET,
+      c.env.JWT_SECRET
     )
 
     setCookie(c, OAUTH_COOKIES.SESSION, sessionJwt, {
@@ -88,7 +85,7 @@ const route = new Hono<AppEnv>().post(
     // /authorize へ戻すと同意画面が表示される
     const query = buildAuthorizeQuery(form)
     return c.redirect(`${OAUTH_PATHS.AUTHORIZE}?${query}`, 303)
-  },
+  }
 )
 
 export default route

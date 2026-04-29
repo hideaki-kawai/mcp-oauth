@@ -32,7 +32,7 @@ const route = new Hono<AppEnv>().get(
     const { from, to } = c.req.valid('query')
     const data = await FxDomain.getRate({ from, to })
     return c.json(data)
-  },
+  }
 )
 
 export default route

@@ -6,12 +6,7 @@
  */
 
 import * as coingecko from '../../libs/coingecko'
-import type {
-  CryptoHistory,
-  CryptoMarket,
-  CryptoPrice,
-  OhlcPoint,
-} from '../../schemas/dto'
+import type { CryptoHistory, CryptoMarket, CryptoPrice, OhlcPoint } from '../../schemas/dto'
 
 type OhlcDays = '1' | '7' | '14' | '30' | '90' | '180' | '365'
 
@@ -19,10 +14,7 @@ export class CryptoDomain {
   /**
    * 現在価格を取得
    */
-  static async getPrice(input: {
-    symbol: string
-    vsCurrency: string
-  }): Promise<CryptoPrice> {
+  static async getPrice(input: { symbol: string; vsCurrency: string }): Promise<CryptoPrice> {
     const id = coingecko.symbolToId(input.symbol)
     const vsCurrency = input.vsCurrency.toLowerCase()
 
@@ -43,10 +35,7 @@ export class CryptoDomain {
   /**
    * 市場データ（時価総額・24h 変動率など）
    */
-  static async getMarket(input: {
-    symbol: string
-    vsCurrency: string
-  }): Promise<CryptoMarket> {
+  static async getMarket(input: { symbol: string; vsCurrency: string }): Promise<CryptoMarket> {
     const id = coingecko.symbolToId(input.symbol)
     const vsCurrency = input.vsCurrency.toLowerCase()
 
@@ -60,9 +49,7 @@ export class CryptoDomain {
       marketCap: pickNumber(md?.market_cap, vsCurrency),
       totalVolume24h: pickNumber(md?.total_volume, vsCurrency),
       priceChangePercent24h:
-        typeof md?.price_change_percentage_24h === 'number'
-          ? md.price_change_percentage_24h
-          : null,
+        typeof md?.price_change_percentage_24h === 'number' ? md.price_change_percentage_24h : null,
       high24h: pickNumber(md?.high_24h, vsCurrency),
       low24h: pickNumber(md?.low_24h, vsCurrency),
       ath: pickNumber(md?.ath, vsCurrency),

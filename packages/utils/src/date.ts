@@ -39,8 +39,7 @@ export const isExpiredDate = (date: Date): boolean => isPast(date)
  *
  * @example expiresAt(300) // 5分後 → "2026-04-29T..."
  */
-export const expiresAt = (seconds: number): string =>
-  formatISO(addSeconds(new Date(), seconds))
+export const expiresAt = (seconds: number): string => formatISO(addSeconds(new Date(), seconds))
 
 /**
  * ISO8601 文字列の日時が期限切れかどうかを返す
@@ -65,5 +64,4 @@ export const todayIso = (): string => format(new Date(), 'yyyy-MM-dd')
  *
  * @example daysAgoIso(7) // 7日前の "2026-04-22"
  */
-export const daysAgoIso = (days: number): string =>
-  format(subDays(new Date(), days), 'yyyy-MM-dd')
+export const daysAgoIso = (days: number): string => format(subDays(new Date(), days), 'yyyy-MM-dd')

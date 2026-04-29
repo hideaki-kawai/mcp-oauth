@@ -34,7 +34,7 @@ app.use(
   cors({
     origin: (origin) => origin ?? 'http://localhost:30000',
     credentials: true,
-  }),
+  })
 )
 
 app.use(renderer)
@@ -61,7 +61,7 @@ app.get(
         { name: 'token', description: 'トークン発行・更新' },
       ],
     },
-  }),
+  })
 )
 
 // Swagger UI（GET /docs で開ける）

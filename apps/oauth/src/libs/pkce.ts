@@ -24,10 +24,7 @@ function bytesToBase64Url(bytes: Uint8Array): string {
  * 注意: タイミング攻撃対策の定数時間比較は行っていない（base64url 文字列同士の比較で
  * 攻撃成立性は低いため）。気になるなら後で timingSafeEqual を入れる。
  */
-export async function verifyPkce(
-  verifier: string,
-  expectedChallenge: string,
-): Promise<boolean> {
+export async function verifyPkce(verifier: string, expectedChallenge: string): Promise<boolean> {
   const data = new TextEncoder().encode(verifier)
   const hashBuffer = await crypto.subtle.digest('SHA-256', data)
   const challenge = bytesToBase64Url(new Uint8Array(hashBuffer))

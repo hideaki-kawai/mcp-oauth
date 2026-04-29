@@ -59,7 +59,7 @@ async function deriveBits(
     ['deriveBits']
   )
   const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations, hash: PBKDF2_HASH_ALGO },
+    { name: 'PBKDF2', salt: salt as BufferSource, iterations, hash: PBKDF2_HASH_ALGO },
     keyMaterial,
     PBKDF2_KEY_LENGTH_BYTES * 8
   )

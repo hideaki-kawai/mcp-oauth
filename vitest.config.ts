@@ -12,12 +12,6 @@ export default defineConfig({
     globals: true, // describe/it/expect をグローバルに使えるようにする
     environment: 'node', // crypto.subtle / getRandomValues / btoa は Node 22+ で利用可能
     include: ['**/*.{spec,test}.{ts,tsx}'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/.wrangler/**',
-      '**/.turbo/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.wrangler/**', '**/.turbo/**'],
   },
 })

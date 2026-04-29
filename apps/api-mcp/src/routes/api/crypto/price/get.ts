@@ -31,7 +31,7 @@ const route = new Hono<AppEnv>().get(
     const { symbol, vsCurrency } = c.req.valid('query')
     const data = await CryptoDomain.getPrice({ symbol, vsCurrency })
     return c.json(data)
-  },
+  }
 )
 
 export default route

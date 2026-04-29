@@ -20,16 +20,8 @@ import {
   getCryptoMarketHandler,
   getCryptoMarketName,
 } from './get-crypto-market'
-import {
-  getCryptoPriceConfig,
-  getCryptoPriceHandler,
-  getCryptoPriceName,
-} from './get-crypto-price'
-import {
-  getFxHistoryConfig,
-  getFxHistoryHandler,
-  getFxHistoryName,
-} from './get-fx-history'
+import { getCryptoPriceConfig, getCryptoPriceHandler, getCryptoPriceName } from './get-crypto-price'
+import { getFxHistoryConfig, getFxHistoryHandler, getFxHistoryName } from './get-fx-history'
 import { getFxRateConfig, getFxRateHandler, getFxRateName } from './get-fx-rate'
 
 export function registerTools(server: McpServer): void {

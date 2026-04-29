@@ -35,14 +35,12 @@ export class RegisterService {
   /**
    * DCR 登録処理本体
    */
-  static async register(
-    d1: D1Database,
-    req: RegisterRequest,
-  ): Promise<Result<RegisterResponse>> {
+  static async register(d1: D1Database, req: RegisterRequest): Promise<Result<RegisterResponse>> {
     // 1. デフォルト値補完
     const grantTypes = req.grant_types ?? DEFAULT_GRANT_TYPES
     const responseTypes = req.response_types ?? DEFAULT_RESPONSE_TYPES
-    const tokenEndpointAuthMethod = req.token_endpoint_auth_method ?? DEFAULT_TOKEN_ENDPOINT_AUTH_METHOD
+    const tokenEndpointAuthMethod =
+      req.token_endpoint_auth_method ?? DEFAULT_TOKEN_ENDPOINT_AUTH_METHOD
     const scope = req.scope ?? DEFAULT_SCOPE
     const clientName = req.client_name ?? DEFAULT_CLIENT_NAME
 

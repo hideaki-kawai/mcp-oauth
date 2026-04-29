@@ -28,11 +28,15 @@ const route = new Hono<AppEnv>().post(
   describeRoute({
     tags: ['authorize'],
     summary: '同意処理（approve / deny）',
-    description: 'redirect_uri へリダイレクトする。approve は code、deny は error=access_denied を付与。',
+    description:
+      'redirect_uri へリダイレクトする。approve は code、deny は error=access_denied を付与。',
     responses: {
       303: { description: 'redirect_uri へリダイレクト' },
       400: { description: 'form 不正・client/redirect_uri 不一致', content: { 'text/html': {} } },
-      401: { description: 'OAuth セッション Cookie が無い・期限切れ', content: { 'text/html': {} } },
+      401: {
+        description: 'OAuth セッション Cookie が無い・期限切れ',
+        content: { 'text/html': {} },
+      },
     },
   }),
   validator('form', authorizeConsentFormSchema, (result, c) => {
@@ -48,7 +52,7 @@ const route = new Hono<AppEnv>().post(
     if (!cookie) {
       return c.html(
         <ErrorScreen title="ログインが必要です" message="ログイン画面からやり直してください" />,
-        401,
+        401
       )
     }
     let userId: string
@@ -58,7 +62,7 @@ const route = new Hono<AppEnv>().post(
     } catch {
       return c.html(
         <ErrorScreen title="セッションが無効です" message="再ログインしてください" />,
-        401,
+        401
       )
     }
 
@@ -76,7 +80,7 @@ const route = new Hono<AppEnv>().post(
 
     // 3. redirect_uri へ 303 リダイレクト
     return c.redirect(result.data.redirectUrl, 303)
-  },
+  }
 )
 
 export default route

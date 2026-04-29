@@ -66,7 +66,7 @@ export class TokenService {
   static async exchangeAuthorizationCode(
     d1: D1Database,
     input: ExchangeAuthCodeInput,
-    jwtSecret: string,
+    jwtSecret: string
   ): Promise<Result<TokenResponse> & { errorCode?: TokenErrorCode }> {
     // 1. code を検索
     const codeResult = await TokenRepository.findAuthCode(d1, input.code)
@@ -124,7 +124,7 @@ export class TokenService {
   static async refresh(
     d1: D1Database,
     input: RefreshInput,
-    jwtSecret: string,
+    jwtSecret: string
   ): Promise<Result<TokenResponse> & { errorCode?: TokenErrorCode }> {
     // 1. refresh_token を検索
     const findResult = await TokenRepository.findRefreshToken(d1, input.refreshToken)
@@ -186,12 +186,12 @@ function invalidGrant(message: string) {
 async function issueTokens(
   d1: D1Database,
   jwtSecret: string,
-  input: { userId: string; clientId: string; scopes: string },
+  input: { userId: string; clientId: string; scopes: string }
 ): Promise<Result<TokenResponse>> {
   // アクセストークン（5 分）
   const accessToken = await JwtDomain.signAccessToken(
     { sub: input.userId, clientId: input.clientId, scope: input.scopes },
-    jwtSecret,
+    jwtSecret
   )
 
   // リフレッシュトークン（30 日）

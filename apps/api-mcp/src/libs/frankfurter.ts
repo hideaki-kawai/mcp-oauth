@@ -46,10 +46,7 @@ export type FrankfurterTimeseries = z.infer<typeof timeseriesResponseSchema>
  *
  * @example getLatest('USD', ['JPY', 'EUR'])
  */
-export async function getLatest(
-  base: string,
-  symbols: string[],
-): Promise<FrankfurterLatest> {
+export async function getLatest(base: string, symbols: string[]): Promise<FrankfurterLatest> {
   const url = new URL(`${BASE_URL}/latest`)
   url.searchParams.set('base', base)
   url.searchParams.set('symbols', symbols.join(','))
@@ -69,7 +66,7 @@ export async function getLatest(
 export async function convertAmount(
   amount: number,
   base: string,
-  symbols: string[],
+  symbols: string[]
 ): Promise<FrankfurterLatest> {
   const url = new URL(`${BASE_URL}/latest`)
   url.searchParams.set('amount', String(amount))
@@ -95,7 +92,7 @@ export async function getTimeseries(
   base: string,
   symbols: string[],
   startDate: string,
-  endDate?: string,
+  endDate?: string
 ): Promise<FrankfurterTimeseries> {
   const range = endDate ? `${startDate}..${endDate}` : `${startDate}..`
   const url = new URL(`${BASE_URL}/${range}`)

@@ -36,7 +36,7 @@ export class AuthorizeRepository {
    */
   static async findClientById(
     d1: D1Database,
-    clientId: string,
+    clientId: string
   ): Promise<Result<OAuthClient | null>> {
     try {
       const db = drizzle(d1)

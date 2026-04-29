@@ -60,7 +60,7 @@ const route = new Hono<AppEnv>().get(
       token_endpoint_auth_methods_supported: ['none'] as const,
       scopes_supported: ['read', 'write'],
     })
-  },
+  }
 )
 
 export default route

@@ -31,7 +31,7 @@ const route = new Hono<AppEnv>().get(
     const { from, to, days } = c.req.valid('query')
     const data = await FxDomain.getHistory({ from, to, days })
     return c.json(data)
-  },
+  }
 )
 
 export default route

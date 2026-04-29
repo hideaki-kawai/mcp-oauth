@@ -45,16 +45,11 @@ const route = new Hono<AppEnv>().get(
       // クエリ形式不正は redirect_uri が信頼できないので直接エラー画面
       const detail = result.error
         .map((issue) => {
-          const path = (issue.path ?? [])
-            .map((p) => (typeof p === 'object' ? p.key : p))
-            .join('.')
+          const path = (issue.path ?? []).map((p) => (typeof p === 'object' ? p.key : p)).join('.')
           return path ? `${path}: ${issue.message}` : issue.message
         })
         .join(', ')
-      return c.html(
-        <ErrorScreen title="リクエストが不正です" message={detail} />,
-        400,
-      )
+      return c.html(<ErrorScreen title="リクエストが不正です" message={detail} />, 400)
     }
   }),
   async (c) => {
@@ -93,9 +88,9 @@ const route = new Hono<AppEnv>().get(
     }
 
     return c.html(
-      <ConsentScreen query={query} clientName={client.name} fallbackScope={client.scopes} />,
+      <ConsentScreen query={query} clientName={client.name} fallbackScope={client.scopes} />
     )
-  },
+  }
 )
 
 export default route

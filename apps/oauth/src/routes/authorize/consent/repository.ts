@@ -38,7 +38,7 @@ export class ConsentRepository {
    */
   static async findClientById(
     d1: D1Database,
-    clientId: string,
+    clientId: string
   ): Promise<Result<OAuthClient | null>> {
     try {
       const db = drizzle(d1)
@@ -77,10 +77,7 @@ export class ConsentRepository {
   /**
    * 認可コードを authorization_codes テーブルに INSERT する
    */
-  static async createAuthCode(
-    d1: D1Database,
-    input: CreateAuthCodeInput,
-  ): Promise<Result<void>> {
+  static async createAuthCode(d1: D1Database, input: CreateAuthCodeInput): Promise<Result<void>> {
     try {
       const db = drizzle(d1)
       await db.insert(authorizationCodes).values({

@@ -3,11 +3,7 @@
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import {
-  cryptoDeepDiveConfig,
-  cryptoDeepDiveHandler,
-  cryptoDeepDiveName,
-} from './crypto-deep-dive'
+import { cryptoDeepDiveConfig, cryptoDeepDiveHandler, cryptoDeepDiveName } from './crypto-deep-dive'
 import {
   dailyMarketBriefConfig,
   dailyMarketBriefHandler,
@@ -15,10 +11,6 @@ import {
 } from './daily-market-brief'
 
 export function registerPrompts(server: McpServer): void {
-  server.registerPrompt(
-    dailyMarketBriefName,
-    dailyMarketBriefConfig,
-    dailyMarketBriefHandler,
-  )
+  server.registerPrompt(dailyMarketBriefName, dailyMarketBriefConfig, dailyMarketBriefHandler)
   server.registerPrompt(cryptoDeepDiveName, cryptoDeepDiveConfig, cryptoDeepDiveHandler)
 }

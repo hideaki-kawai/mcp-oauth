@@ -86,11 +86,7 @@ describe('FxDomain.getHistory', () => {
 
     const result = await FxDomain.getHistory({ from: 'USD', to: 'JPY', days: 7 })
 
-    expect(result.points.map((p) => p.date)).toEqual([
-      '2026-04-22',
-      '2026-04-25',
-      '2026-04-29',
-    ])
+    expect(result.points.map((p) => p.date)).toEqual(['2026-04-22', '2026-04-25', '2026-04-29'])
     expect(result.points[0].rate).toBe(150.1)
   })
 })

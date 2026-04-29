@@ -30,7 +30,7 @@ describe('RegisterService.register', () => {
     if (!result.success) return
     // UUID v4 形式
     expect(result.data.client_id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
     )
   })
 
@@ -111,7 +111,9 @@ describe('RegisterService.register', () => {
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.data.client_id_issued_at).toBe(Math.floor(new Date('2026-04-29T12:00:00Z').getTime() / 1000))
+    expect(result.data.client_id_issued_at).toBe(
+      Math.floor(new Date('2026-04-29T12:00:00Z').getTime() / 1000)
+    )
 
     vi.useRealTimers()
   })

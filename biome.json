@@ -15,7 +15,8 @@
       "!**/.turbo",
       "!**/*.css",
       "!**/worker-configuration.d.ts",
-      "!**/migrations"
+      "!**/migrations",
+      "!apps/web/app/welcome"
     ]
   },
   "formatter": {

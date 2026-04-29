@@ -17,11 +17,7 @@ export const convertCurrencyConfig = {
   },
 }
 
-export async function convertCurrencyHandler(input: {
-  amount: number
-  from: string
-  to: string
-}) {
+export async function convertCurrencyHandler(input: { amount: number; from: string; to: string }) {
   const result = await FxDomain.convert(input)
   return {
     content: [

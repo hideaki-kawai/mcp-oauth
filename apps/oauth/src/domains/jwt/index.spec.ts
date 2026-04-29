@@ -9,7 +9,7 @@ describe('JwtDomain.signAccessToken', () => {
   it('iat / exp / sub / client_id / scope / type を含む有効な JWT を返す', async () => {
     const token = await JwtDomain.signAccessToken(
       { sub: 'user-1', clientId: 'client-1', scope: 'read write' },
-      SECRET,
+      SECRET
     )
 
     expect(token).toMatch(/^[\w-]+\.[\w-]+\.[\w-]+$/)
@@ -29,10 +29,11 @@ describe('JwtDomain.signAccessToken', () => {
 
     const token = await JwtDomain.signAccessToken(
       { sub: 'user-1', clientId: 'client-1', scope: 'read' },
-      SECRET,
+      SECRET
     )
     const { payload } = decode(token)
 
+    // biome-ignore lint/style/noNonNullAssertion: テストデータなので存在確認済み
     expect(payload.exp! - payload.iat!).toBe(5 * 60)
 
     vi.useRealTimers()
@@ -55,6 +56,7 @@ describe('JwtDomain.signOAuthSession + verifyOAuthSession (roundtrip)', () => {
     const token = await JwtDomain.signOAuthSession({ sub: 'user-1' }, SECRET)
     const { payload } = decode(token)
 
+    // biome-ignore lint/style/noNonNullAssertion: テストデータなので存在確認済み
     expect(payload.exp! - payload.iat!).toBe(7 * 24 * 60 * 60)
 
     vi.useRealTimers()
@@ -82,10 +84,10 @@ describe('JwtDomain.verifyOAuthSession (異常系)', () => {
   it('アクセストークン（type=access）を拒否する — 誤流入の防止', async () => {
     const accessToken = await JwtDomain.signAccessToken(
       { sub: 'user-1', clientId: 'client-1', scope: 'read' },
-      SECRET,
+      SECRET
     )
     await expect(JwtDomain.verifyOAuthSession(accessToken, SECRET)).rejects.toThrow(
-      /invalid oauth_session payload/,
+      /invalid oauth_session payload/
     )
   })
 
