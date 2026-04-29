@@ -18,7 +18,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -40,7 +40,7 @@ export default function App() {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = 'Oops!'
-  let details = 'An unexpected error occurred.'
+  let details = '予期しないエラーが発生しました。'
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {
