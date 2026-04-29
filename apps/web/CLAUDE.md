@@ -82,6 +82,38 @@ import { something } from '@mcp-oauth/api-mcp'
 `.env.local` に書く。`.env.example` を参照。
 ビルド時に Vite が `import.meta.env.VITE_*` を埋め込むため、**実行時に値を変更できない**点に注意。
 
+### データ取得は Suspense + Await で遅延ロード
+
+`clientLoader` で API 呼び出しを `await` せず Promise のまま返し、
+コンポーネント側で `<Suspense>` + `<Await>` で包む。
+これによりページ（ヘッダー等）を先に表示し、データ取得中はスケルトンを出せる。
+
+```ts
+// ✅ OK（Promise を返す → ページ遷移がブロックされない）
+export const clientLoader = (_: Route.ClientLoaderArgs) => {
+  const dataPromise = api.api.foo.$get().then((res) => (res.ok ? res.json() : null))
+  return { dataPromise }
+}
+
+// ❌ NG（await するとデータが揃うまでページが表示されない）
+export const clientLoader = async (_: Route.ClientLoaderArgs) => {
+  const res = await api.api.foo.$get()
+  return { data: res.ok ? await res.json() : null }
+}
+```
+
+```tsx
+// コンポーネント側
+import { Suspense } from 'react'
+import { Await } from 'react-router'
+
+<Suspense fallback={<Skeleton />}>
+  <Await resolve={dataPromise}>
+    {(data) => <DataCard data={data} />}
+  </Await>
+</Suspense>
+```
+
 ### Cookie の扱い
 
 `api.ts` で `credentials: 'include'` を付与している。
