@@ -32,10 +32,20 @@ export type Bindings = {
   JWT_SECRET: string
 }
 
+/** OAuth サーバー（apps/oauth）の JwtDomain.signAccessToken と同形式 */
+export type AccessTokenPayload = {
+  sub: string
+  client_id: string
+  scope: string
+  type: 'access'
+  iat: number
+  exp: number
+}
+
 /** Hono のコンテキスト変数（ミドルウェアが詰める値） */
 export type Variables = {
-  // 認証ミドルウェアが詰める JWT ペイロード（フェーズ3 で実装）
-  // user?: JwtAccessTokenPayload
+  /** authMiddleware が JWT 検証成功時にセットするユーザー情報 */
+  user?: AccessTokenPayload
 }
 
 /** Hono アプリケーションのジェネリクス用統合型 */

@@ -4,8 +4,8 @@
  * MCP サーバー本体 + Web フロントエンドの BFF を兼ねる Hono アプリ。
  *
  * 主な責務:
- *   - MCP プロトコル（/mcp）— Claude からのツール呼び出し
- *   - BFF API（/api/*）— Web SPA からのリクエスト
+ *   - MCP プロトコル（/mcp）— Claude からのツール呼び出し（authMiddleware で保護）
+ *   - 共通 API（/api/fx, /api/crypto）— Web SPA & MCP の両方が使う
  *   - OpenAPI ドキュメント（/docs）
  *
  * Hono RPC:
@@ -15,11 +15,20 @@
  */
 
 import { swaggerUI } from '@hono/swagger-ui'
+import { API_MCP_PATHS } from '@mcp-oauth/constants'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { openAPIRouteHandler } from 'hono-openapi'
-import { renderer } from './renderer'
+import { authMiddleware } from './middlewares/auth-middleware'
+import cryptoHistoryRoute from './routes/api/crypto/history/get'
+import cryptoMarketRoute from './routes/api/crypto/market/get'
+import cryptoPriceRoute from './routes/api/crypto/price/get'
+import fxConvertRoute from './routes/api/fx/convert/get'
+import fxHistoryRoute from './routes/api/fx/history/get'
+import fxRateRoute from './routes/api/fx/rate/get'
 import healthRoute from './routes/health/get'
+import mcpRoute from './routes/mcp/post'
+import wellKnownRoute from './routes/well-known/get'
 import type { AppEnv } from './types'
 
 const app = new Hono<AppEnv>()
@@ -37,7 +46,13 @@ app.use(
   }),
 )
 
-app.use(renderer)
+// ─────────────────────────────────────────────────────────
+// 認証必須エンドポイント（/mcp と /api/* の業務 API）
+// ─────────────────────────────────────────────────────────
+app.use(`${API_MCP_PATHS.MCP}/*`, authMiddleware)
+app.use(API_MCP_PATHS.MCP, authMiddleware)
+app.use('/api/fx/*', authMiddleware)
+app.use('/api/crypto/*', authMiddleware)
 
 // ─────────────────────────────────────────────────────────
 // OpenAPI ドキュメント（開発時の動作確認用）
@@ -56,7 +71,9 @@ app.get(
       servers: [{ url: 'http://localhost:30001', description: 'Local' }],
       tags: [
         { name: 'health', description: 'ヘルスチェック' },
-        // 今後追加: { name: 'auth', description: 'BFF: トークン交換' } など
+        { name: 'discovery', description: 'OAuth Protected Resource Metadata' },
+        { name: 'fx', description: '為替（FX）— Frankfurter / ECB' },
+        { name: 'crypto', description: '暗号通貨 — CoinGecko' },
       ],
       components: {
         securitySchemes: {
@@ -79,9 +96,21 @@ app.get('/docs', swaggerUI({ url: '/docs/openapi.json' }))
 // ルート登録（Hono RPC のため .route(...).route(...) チェーンで書く）
 // ─────────────────────────────────────────────────────────
 
-app.get('/', (c) => c.render(<h1>api-mcp</h1>))
+app.get('/', (c) => c.text('api-mcp'))
 
-export const routes = app.route('/api', healthRoute)
+export const routes = app
+  .route(API_MCP_PATHS.WELL_KNOWN, wellKnownRoute)
+  .route('/api', healthRoute)
+  // FX
+  .route(API_MCP_PATHS.FX_RATE, fxRateRoute)
+  .route(API_MCP_PATHS.FX_CONVERT, fxConvertRoute)
+  .route(API_MCP_PATHS.FX_HISTORY, fxHistoryRoute)
+  // Crypto
+  .route(API_MCP_PATHS.CRYPTO_PRICE, cryptoPriceRoute)
+  .route(API_MCP_PATHS.CRYPTO_MARKET, cryptoMarketRoute)
+  .route(API_MCP_PATHS.CRYPTO_HISTORY, cryptoHistoryRoute)
+  // MCP プロトコル
+  .route(API_MCP_PATHS.MCP, mcpRoute)
 
 export default app
 

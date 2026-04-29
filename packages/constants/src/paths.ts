@@ -19,9 +19,19 @@ export const OAUTH_PATHS = {
 export const API_MCP_PATHS = {
   WELL_KNOWN: '/.well-known/oauth-protected-resource',
   MCP: '/mcp',
+  HEALTH: '/api/health',
+  // BFF（フェーズ 5 で実装）
   AUTH_TOKEN: '/api/auth/token',
   AUTH_REFRESH: '/api/auth/refresh',
   AUTH_LOGOUT: '/api/auth/logout',
+  // FX（Web SPA / MCP 共通データソース）
+  FX_RATE: '/api/fx/rate',
+  FX_CONVERT: '/api/fx/convert',
+  FX_HISTORY: '/api/fx/history',
+  // Crypto
+  CRYPTO_PRICE: '/api/crypto/price',
+  CRYPTO_MARKET: '/api/crypto/market',
+  CRYPTO_HISTORY: '/api/crypto/history',
 } as const
 
 /** Webフロントエンド（apps/web）のパス */

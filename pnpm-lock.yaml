@@ -23,6 +23,9 @@ importers:
 
   apps/api-mcp:
     dependencies:
+      '@coingecko/coingecko-typescript':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@hono/mcp':
         specifier: ^0.1.0
         version: 0.1.5(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(hono@4.12.15)
@@ -460,6 +463,9 @@ packages:
 
   '@cloudflare/workers-types@4.20260425.1':
     resolution: {integrity: sha512-f6dlo3SsA+TNqjveavPDN73nxRfCOOd0iMdf8iEosgR/RJtQlrGwfr5L5Vf7x/5cpeeguxScKevuaMmdjpOECw==}
+
+  '@coingecko/coingecko-typescript@4.0.0':
+    resolution: {integrity: sha512-0opFFKki9Cpp0cP8O7efqu003ZGIPksAxV54Seusp8nBTpTMNa5dgRF5MkCPOE+JI5iGrjLte3WG6MLubpk9Rw==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3340,6 +3346,8 @@ snapshots:
     optional: true
 
   '@cloudflare/workers-types@4.20260425.1': {}
+
+  '@coingecko/coingecko-typescript@4.0.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:

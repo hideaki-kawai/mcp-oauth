@@ -20,4 +20,7 @@
  * フェーズ5 で /api/auth/* の DTO を追加する。
  */
 
+export * from './crypto'
+export * from './fx'
 export * from './health'
+export * from './well-known'

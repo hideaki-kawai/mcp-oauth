@@ -383,46 +383,300 @@ curl -X POST http://localhost:PORT/register \
 
 ### 目標
 Claudeからのアクセスが通り、MCPプロトコルが動作する状態にする。
+さらに、実際に動く **MCP ツール 6 種類 + Prompt 2 種類** を実装して Claude から呼べるようにする。
+
+### MCP プリミティブの構成
+
+DB を持たず、外部の公開 API（キー不要）をラップしたツールと、それらを束ねる Prompt を提供する。
+学習目的に最適: 認証付き MCP の実装に集中でき、API ラッパーは薄く保てる。
+
+#### Tools（6 種類）— LLM が自動的に呼ぶ「アクション」
+
+| ツール | データ源 | 用途 |
+|--------|---------|------|
+| `get_fx_rate` | Frankfurter | 2 通貨間の最新レート（例: USD → JPY） |
+| `convert_currency` | Frankfurter | 金額の通貨換算（例: 100 USD は何 JPY？） |
+| `get_fx_history` | Frankfurter | 期間指定で為替推移を取得（例: 直近 7 日の USD/JPY） |
+| `get_crypto_price` | CoinGecko | 暗号通貨の現在価格（例: BTC の今の値段） |
+| `get_crypto_market` | CoinGecko | 時価総額・24h 変動率など市場データ |
+| `get_crypto_history` | CoinGecko | OHLC チャート（例: 直近 7 日の BTC 推移） |
+
+#### Prompts（2 種類）— ユーザーがスラッシュコマンドで明示的に発動
+
+| Prompt | 説明 |
+|--------|------|
+| `daily_market_brief` | 主要な暗号通貨と為替の今日の状況をまとめる。引数 `focusCurrency`（任意）で重点通貨ペアを指定可能 |
+| `crypto_deep_dive` | 1 銘柄について価格・時価総額・直近変動を多角的に分析。引数 `symbol` 必須 |
+
+Prompt の中身は **日本語** で書く（プロジェクト規約）。
+Prompt は内部で複数の Tool を順に呼ぶように Claude に指示するメッセージを返す。
+
+#### 採用する API クライアント
+
+| API | クライアント | 採用方針 |
+|-----|------------|---------|
+| **CoinGecko** | `@coingecko/coingecko-typescript`（**公式 SDK**） | Cloudflare Workers 対応公式・型完備・自動リトライ・無料枠もキー無しで使える |
+| **Frankfurter** | 自前の薄い fetch ラッパー（`libs/frankfurter.ts`） | 公式 SDK が無い・API がシンプル（GET 1 本）・third-party SDK を入れる利得が無い |
+
+```bash
+pnpm -F @mcp-oauth/api-mcp add @hono/mcp @modelcontextprotocol/sdk
+pnpm -F @mcp-oauth/api-mcp add @coingecko/coingecko-typescript
+```
+
+### 設計方針: 「domains/ を共通データ層」にして MCP と Web で重複を消す
+
+api-mcp は MCP クライアント（Claude）と Web SPA の両方にデータを提供する。
+同じ機能を 2 つの surface で出すため、外部 API 呼び出しを直接 Tool / Controller に書くと重複する。
+
+これを避けるために 3 層に分ける:
+
+```
+external API (Frankfurter / CoinGecko)
+   ↓
+libs/        ← 外部 API ラッパー（fetch / SDK 直叩き、純粋なデータ取得）
+   ↓
+domains/     ← ★ プロトコル非依存の共通層（型を整形して返す）★
+   ↓
+   ├──→ routes/mcp/tools/*    ← domain を呼んで MCP 形式に整形
+   └──→ routes/api/fx,crypto/*  ← domain を呼んで JSON で返す（Hono RPC）
+```
+
+- 「USD/JPY の今日のレート取得」というロジックは `FxDomain.getRate()` の 1 箇所だけ
+- MCP Tool / Web API は domain の戻り値を MCP 形式 / JSON 形式に変換するだけの薄いアダプタ
 
 ### アーキテクチャ
 
 ```
 apps/api-mcp/src/
+  index.tsx
+  types.ts                          ← Bindings / Variables / AppEnv
+  middlewares/                      ← trade-agent と同じ配置
+    index.ts                        ← export 集約
+    auth-middleware.ts              ← JWT 検証ミドルウェア
+  libs/
+    coingecko.ts                    ← @coingecko/coingecko-typescript の薄いラッパー
+    frankfurter.ts                  ← Frankfurter API の薄い fetch ラッパー
+  domains/                          ← ★ 共通データ層 ★
+    fx/
+      index.ts                      ← FxDomain: getRate / convert / getHistory
+    crypto/
+      index.ts                      ← CryptoDomain: getPrice / getMarket / getHistory
+  schemas/dto/                      ← zod スキーマ（domain 戻り値 = z.infer する）
+    fx.ts                           ← fxRateSchema, convertedAmountSchema, fxHistorySchema
+    crypto.ts                       ← cryptoPriceSchema, cryptoMarketSchema, cryptoHistorySchema
   routes/
     well-known/
-      get.ts               ← GET /.well-known/oauth-protected-resource
+      get.ts                        ← GET /.well-known/oauth-protected-resource
+    api/                            ← Web SPA 向け JSON API（Hono RPC で web から呼ぶ）
+      fx/
+        rate/get.ts                 ← GET /api/fx/rate
+        convert/get.ts              ← GET /api/fx/convert
+        history/get.ts              ← GET /api/fx/history
+      crypto/
+        price/get.ts                ← GET /api/crypto/price
+        market/get.ts               ← GET /api/crypto/market
+        history/get.ts              ← GET /api/crypto/history
     mcp/
-      get.ts               ← GET /mcp（MCPエンドポイント）
-      post.ts              ← POST /mcp
-  domains/
-    auth/
-      middleware.ts        ← JWT検証ミドルウェア（docs/06-jwt-tokens.md の実装）
-  index.tsx
+      post.ts                       ← GET/POST /mcp（@hono/mcp）
+      tools/                        ← MCP ツール定義（zod schema + handler）
+        get-fx-rate.ts
+        convert-currency.ts
+        get-fx-history.ts
+        get-crypto-price.ts
+        get-crypto-market.ts
+        get-crypto-history.ts
+        index.ts                    ← registerTools(server) で 6 種を一括登録
+      prompts/                      ← MCP Prompt 定義（日本語テンプレ）
+        daily-market-brief.ts
+        crypto-deep-dive.ts
+        index.ts                    ← registerPrompts(server) で 2 種を一括登録
 ```
+
+各層の責任:
+
+| 層 | 役割 | 戻り値の例 |
+|---|---|---|
+| `libs/` | 外部 API を叩いて生レスポンスを返す | `frankfurter.getLatest('USD', ['JPY'])` → `{ rates: { JPY: 150.23 }, date: '2026-04-29' }` |
+| `domains/` | 業務概念に正規化（プロトコル非依存） | `FxDomain.getRate(...)` → `{ rate: 150.23, from, to, asOf }` |
+| `tools/*` (MCP) | domain を呼んで `{content:[{type:'text',text:...}]}` に整形 | テキスト「1 USD = 150.23 JPY (2026-04-29 時点)」 |
+| `routes/api/*` (Web) | domain を呼んで JSON で返す（OpenAPI 化） | `{ rate: 150.23, from: 'USD', to: 'JPY', asOf: '...' }` |
+
+`schemas/dto/` の zod スキーマは **domain と Web API の両方が共有**する（`z.infer<typeof xxx>` で domain 戻り値型を導出）。
 
 ### 実装順序
 
 #### 3-1. `GET /.well-known/oauth-protected-resource`
-静的なJSONを返すだけ。
+静的な JSON を返すだけ（RFC 9728 / MCP Authorization spec）。
 
-#### 3-2. JWT認証ミドルウェア
+```json
+{
+  "resource": "<API_MCP_BASE_URL>",
+  "authorization_servers": ["<OAUTH_ISSUER>"],
+  "bearer_methods_supported": ["header"],
+  "scopes_supported": ["read", "write"]
+}
+```
 
-`docs/06-jwt-tokens.md` のコード例を実装する。
+#### 3-2. JWT 認証ミドルウェア（`middlewares/auth-middleware.ts`）
 
-- `Authorization: Bearer <JWT>` ヘッダーを検証
-- `payload.type === "access"` を確認（OAuthセッショントークンを拒否）
+trade-agent の構成と同様に `middlewares/` 配下に配置:
+
+```
+middlewares/
+  index.ts              ← export 集約
+  auth-middleware.ts    ← MiddlewareHandler<AppEnv>
+```
+
+- `Authorization: Bearer <JWT>` を検証
+- `payload.type === "access"` を確認（OAuth セッション JWT を拒否）
+- 検証成功時: `c.set('user', payload)` で Variables に格納
 - 未認証時: `401 + WWW-Authenticate: Bearer resource_metadata="..."`
 
-**ユニットテスト対象**: 正常系・未認証・期限切れ・不正type
+**ユニットテスト対象**: 正常系・未認証・期限切れ・不正 type
 
-#### 3-3. `GET /mcp` / `POST /mcp` — MCPエンドポイント
+#### 3-3. 外部 API クライアントラッパー（`libs/`）
 
-**`@hono/mcp`** パッケージを使って Streamable HTTP トランスポートを実装する。
-`McpServer`（`@modelcontextprotocol/sdk`）にツール・リソースを登録し、`StreamableHTTPTransport` で Hono に接続する。
-初期実装は最小限（ツール未登録でも `tools/list` に空配列を返せばOK）。
+**`libs/coingecko.ts`**: `@coingecko/coingecko-typescript`（公式 SDK）を初期化して使う。
+無料公開 API なので key 不要（`new Coingecko({})` で初期化）。
 
-```bash
-pnpm -F @mcp-oauth/api-mcp add @hono/mcp @modelcontextprotocol/sdk
+**`libs/frankfurter.ts`**: `https://api.frankfurter.dev/v1/` への fetch を関数化。
+レスポンスを zod でランタイム検証してから返す。
+
+両方とも MCP / Web から直接は呼ばれない（必ず domain 経由）。
+Result<T> は使わず例外で error 伝播（呼び元の domain で try/catch）。
+
+#### 3-4. DTO スキーマ（`schemas/dto/fx.ts`, `crypto.ts`）
+
+zod でレスポンス型を定義。これが **domain の戻り値型 = Web API のレスポンス = MCP の structuredContent** の単一の真実になる。
+
+```typescript
+// schemas/dto/fx.ts
+export const fxRateSchema = z.object({
+  rate: z.number(),
+  from: z.string(),
+  to: z.string(),
+  asOf: z.string(), // YYYY-MM-DD
+})
+export type FxRate = z.infer<typeof fxRateSchema>
+
+// 同様に convertedAmountSchema, fxHistorySchema
+```
+
+#### 3-5. ドメイン層（`domains/fx`, `domains/crypto`）
+
+`libs/` を呼んで、戻り値を schemas/dto の形に整形する純粋関数。
+クラス + static メソッド構成（AGENTS.md 規約）。
+
+```typescript
+// domains/fx/index.ts
+export class FxDomain {
+  static async getRate(input: { from: string; to: string }): Promise<FxRate> {
+    const raw = await frankfurter.getLatest(input.from, [input.to])
+    return {
+      rate: raw.rates[input.to],
+      from: input.from,
+      to: input.to,
+      asOf: raw.date,
+    }
+  }
+  static async convert(...): Promise<ConvertedAmount> { ... }
+  static async getHistory(...): Promise<FxHistory> { ... }
+}
+```
+
+**ユニットテスト対象**: 各 method（libs を vi.mock）
+
+#### 3-6. Web API（`routes/api/fx/*`, `routes/api/crypto/*`）
+
+各エンドポイントは Controller のみ（service.ts なし — domain がすでに業務層なので冗長）。
+`describeRoute` + `validator('query', ...)` で OpenAPI に反映、domain を直接呼んで JSON 返却。
+
+```typescript
+// routes/api/fx/rate/get.ts
+const route = new Hono<AppEnv>().get(
+  '/',
+  describeRoute({ tags: ['fx'], responses: { 200: { ... fxRateSchema ... } } }),
+  validator('query', getFxRateQuerySchema, errorHandler),
+  async (c) => {
+    const { from, to } = c.req.valid('query')
+    const result = await FxDomain.getRate({ from, to })
+    return c.json(result)
+  },
+)
+```
+
+#### 3-7. MCP Tool 定義（`routes/mcp/tools/`）
+
+domain を呼んで MCP 形式（`{content:[{type:'text',text:...}]}`）に整形するだけの薄い層。
+
+```typescript
+// 例: tools/get-fx-rate.ts
+export const getFxRateConfig = {
+  title: '為替レート取得',
+  description: '指定した 2 通貨間の最新為替レート（ECB 公式データ）',
+  inputSchema: { from: z.string().length(3), to: z.string().length(3) },
+}
+
+export async function getFxRateHandler({ from, to }: { from: string; to: string }) {
+  const result = await FxDomain.getRate({ from, to })
+  return {
+    content: [{ type: 'text', text: `1 ${result.from} = ${result.rate} ${result.to}（${result.asOf} 時点）` }],
+  }
+}
+```
+
+`tools/index.ts` の `registerTools(server)` で 6 種を一括登録。
+
+#### 3-8. MCP Prompt 定義（`routes/mcp/prompts/`）
+
+ユーザーがスラッシュコマンドで明示的に発動するテンプレ。
+中身は **日本語**（プロジェクト規約）で、Tool を順に呼ぶよう Claude に依頼するメッセージを返す。
+
+```typescript
+// 例: prompts/daily-market-brief.ts
+export const dailyMarketBriefConfig = {
+  title: '今日のマーケット概況',
+  description: '主要な暗号通貨と為替の今日の状況をまとめます',
+  argsSchema: {
+    focusCurrency: z.string().optional().describe('重点通貨ペア（例: USD/JPY）'),
+  },
+}
+
+export function dailyMarketBriefHandler(args: { focusCurrency?: string }) {
+  return {
+    messages: [{
+      role: 'user' as const,
+      content: {
+        type: 'text' as const,
+        text: `以下を実行して今日のマーケット概況をまとめてください:
+1. \`get_crypto_price\` で BTC と ETH の現在価格を取得
+2. \`get_fx_rate\` で USD/JPY と EUR/USD${args.focusCurrency ? ` と ${args.focusCurrency}` : ''}の最新レートを取得
+3. 数値を整理し、目立つ動きや注目点を日本語で簡潔にまとめて報告`,
+      },
+    }],
+  }
+}
+```
+
+`prompts/index.ts` の `registerPrompts(server)` で 2 種を一括登録。
+
+**ユニットテスト対象**: handler が想定通りの日本語テキストを返すこと（純関数）
+
+#### 3-9. `GET /mcp` / `POST /mcp` — MCP エンドポイント
+
+`@hono/mcp` で Streamable HTTP トランスポート、`authMiddleware` で JWT 認証必須。
+
+```typescript
+app.use(API_MCP_PATHS.MCP, authMiddleware)
+
+app.on(['GET', 'POST'], API_MCP_PATHS.MCP, async (c) => {
+  const server = new McpServer({ name: 'mcp-oauth', version: '1.0.0' })
+  registerTools(server)    // 6 ツール
+  registerPrompts(server)  // 2 Prompt
+  const transport = new StreamableHTTPTransport(c.req.raw)
+  await server.connect(transport)
+  return transport.response
+})
 ```
 
 ---
@@ -645,8 +899,26 @@ pnpm -F @mcp-oauth/web test
 
 ### フェーズ3: api-mcpサーバー
 - [ ] `GET /.well-known/oauth-protected-resource`
-- [ ] JWT認証ミドルウェア 実装・テスト
-- [ ] `GET /mcp` / `POST /mcp` 実装（`@hono/mcp`）
+- [ ] `middlewares/auth-middleware.ts`（JWT 検証）実装・テスト
+- [ ] `libs/coingecko.ts`（公式 SDK ラッパー）
+- [ ] `libs/frankfurter.ts`（fetch ラッパー + zod 検証）
+- [ ] `schemas/dto/fx.ts`, `schemas/dto/crypto.ts`（zod スキーマ）
+- [ ] `domains/fx`, `domains/crypto`（共通データ層）実装・テスト
+- [ ] Web API: `GET /api/fx/rate`
+- [ ] Web API: `GET /api/fx/convert`
+- [ ] Web API: `GET /api/fx/history`
+- [ ] Web API: `GET /api/crypto/price`
+- [ ] Web API: `GET /api/crypto/market`
+- [ ] Web API: `GET /api/crypto/history`
+- [ ] MCP Tool: `get_fx_rate`
+- [ ] MCP Tool: `convert_currency`
+- [ ] MCP Tool: `get_fx_history`
+- [ ] MCP Tool: `get_crypto_price`
+- [ ] MCP Tool: `get_crypto_market`
+- [ ] MCP Tool: `get_crypto_history`
+- [ ] MCP Prompt: `daily_market_brief`（日本語）
+- [ ] MCP Prompt: `crypto_deep_dive`（日本語）
+- [ ] `GET /mcp` / `POST /mcp` 実装（`@hono/mcp` + Tool/Prompt 登録）
 
 ### フェーズ4: Cloudflareセットアップ・デプロイ
 - [ ] `wrangler login`

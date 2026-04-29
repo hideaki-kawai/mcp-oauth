@@ -6,7 +6,7 @@
  * 各アプリは date-fns を直接 import せず、このモジュールを介する
  * （プロジェクト全体で一箇所に集約 → date-fns のバージョン管理が楽）。
  */
-import { addSeconds, formatISO, isPast, parseISO } from 'date-fns'
+import { addSeconds, format, formatISO, isPast, parseISO, subDays } from 'date-fns'
 
 // ─────────────────────────────────────────────────────────
 // Date ベース（drizzle の mode: 'timestamp' / DB 用）
@@ -48,3 +48,22 @@ export const expiresAt = (seconds: number): string =>
  * @example isExpired('2024-01-01T00:00:00Z') // true
  */
 export const isExpired = (isoString: string): boolean => isPast(parseISO(isoString))
+
+// ─────────────────────────────────────────────────────────
+// 日付（YYYY-MM-DD）ベース（外部 API クエリ・履歴系で使う）
+// ─────────────────────────────────────────────────────────
+
+/**
+ * 今日の日付を YYYY-MM-DD 形式で返す
+ *
+ * @example todayIso() // "2026-04-29"
+ */
+export const todayIso = (): string => format(new Date(), 'yyyy-MM-dd')
+
+/**
+ * 今日から N 日前の日付を YYYY-MM-DD 形式で返す
+ *
+ * @example daysAgoIso(7) // 7日前の "2026-04-22"
+ */
+export const daysAgoIso = (days: number): string =>
+  format(subDays(new Date(), days), 'yyyy-MM-dd')
