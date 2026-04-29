@@ -21,7 +21,7 @@
     "ENVIRONMENT": "production",
     // OAuth issuer / audience の判定に使用する自分自身のURL
     // 本番デプロイ後に Cloudflare Workers のURLへ書き換える
-    "OAUTH_ISSUER": "http://localhost:30002"
+    "OAUTH_ISSUER": "https://oauth.h-kawai-tech.workers.dev"
   },
   // Workers Logs を有効化（本番障害調査用）
   "observability": {
