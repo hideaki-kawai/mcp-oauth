@@ -263,6 +263,38 @@ SPA: 新しいaccess_tokenをメモリに保存して再度APIを呼ぶ
 
 ---
 
+## ログアウトフロー
+
+完全なログアウトには2つのドメインにまたがるCookieを両方消す必要がある。
+
+```
+[1] ユーザーがログアウトボタンをクリック（apps/web）
+
+[2] POST /api/auth/logout（BFF）
+      ├─ refreshToken Cookie を読む（api-mcp ドメイン）
+      ├─ OAuth /revoke を呼びDBのトークンを失効
+      └─ refreshToken Cookie を削除
+
+[3] window.location.href = oauth/logout?redirect=/login
+    （React Router の navigate ではなく全画面遷移）
+      ├─ oauth_session Cookie を削除（OAuthサーバードメイン）
+      └─ /login へリダイレクト
+
+[4] /login 画面が表示される（ログアウト完了）
+```
+
+> **なぜ2ステップ必要か**  
+> `refreshToken` は api-mcp ドメイン専用、`oauth_session` は OAuth ドメイン専用。
+> Cookie はドメインをまたいで削除できないため、それぞれのサーバーにブラウザが直接リクエストを送る必要がある。
+>
+> **なぜ `window.location.href` を使うか**  
+> React Router の `navigate()` はSPA内遷移なので別ドメインへのHTTPリクエストが発生しない。
+> `window.location.href` はブラウザの実際のナビゲーションを起こすため、OAuthサーバーがCookieを削除できる。
+
+詳細は `docs/learning/logout-flow.md` を参照。
+
+---
+
 ## PKCEのセキュリティ解説
 
 ```
