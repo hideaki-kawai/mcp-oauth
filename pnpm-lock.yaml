@@ -65,13 +65,13 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.2.3
-        version: 1.33.2(vite@6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))
+        version: 1.33.2(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))
       '@cloudflare/workers-types':
         specifier: ^4.0.0
         version: 4.20260425.1
       vite:
-        specifier: ^6.3.5
-        version: 6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+        specifier: ^8.0.10
+        version: 8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)
       wrangler:
         specifier: ^4.17.0
         version: 4.85.0(@cloudflare/workers-types@4.20260425.1)
@@ -111,19 +111,19 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.2.3
-        version: 1.33.2(vite@6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))
+        version: 1.33.2(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))
       '@cloudflare/workers-types':
         specifier: ^4.0.0
         version: 4.20260425.1
       '@tailwindcss/vite':
         specifier: ^4.2.4
-        version: 4.2.4(vite@6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))
+        version: 4.2.4(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))
       tailwindcss:
         specifier: ^4.2.4
         version: 4.2.4
       vite:
-        specifier: ^6.3.5
-        version: 6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+        specifier: ^8.0.10
+        version: 8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)
       wrangler:
         specifier: ^4.17.0
         version: 4.85.0(@cloudflare/workers-types@4.20260425.1)
@@ -3320,12 +3320,12 @@ snapshots:
     optionalDependencies:
       workerd: 1.20260424.1
 
-  '@cloudflare/vite-plugin@1.33.2(vite@6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))':
+  '@cloudflare/vite-plugin@1.33.2(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))(workerd@1.20260424.1)(wrangler@4.85.0(@cloudflare/workers-types@4.20260425.1))':
     dependencies:
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260424.1)
       miniflare: 4.20260424.0
       unenv: 2.0.0-rc.24
-      vite: 6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+      vite: 8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)
       wrangler: 4.85.0(@cloudflare/workers-types@4.20260425.1)
       ws: 8.18.0
     transitivePeerDependencies:
@@ -4161,13 +4161,6 @@ snapshots:
       '@tailwindcss/oxide-wasm32-wasi': 4.2.4
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.4
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.4
-
-  '@tailwindcss/vite@4.2.4(vite@6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
-    dependencies:
-      '@tailwindcss/node': 4.2.4
-      '@tailwindcss/oxide': 4.2.4
-      tailwindcss: 4.2.4
-      vite: 6.4.2(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
 
   '@tailwindcss/vite@4.2.4(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))':
     dependencies:
