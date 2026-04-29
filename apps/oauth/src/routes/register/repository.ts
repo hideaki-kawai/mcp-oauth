@@ -38,6 +38,7 @@ export class RegisterRepository {
         redirectUris: JSON.stringify(input.redirectUris),
         tokenEndpointAuthMethod: input.tokenEndpointAuthMethod,
         scopes: input.scopes,
+        firstParty: false, // DCR 登録クライアントは常に false
         createdAt: input.createdAt,
       })
       return { success: true, data: undefined, error: null }

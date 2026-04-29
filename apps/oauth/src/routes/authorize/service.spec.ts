@@ -11,6 +11,7 @@ const validClient: OAuthClient = {
   redirectUris: ['http://localhost:30000/auth/callback'],
   tokenEndpointAuthMethod: 'none',
   scopes: 'read write',
+  firstParty: true,
   createdAt: new Date('2026-04-01T00:00:00Z'),
 }
 

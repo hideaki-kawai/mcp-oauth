@@ -20,6 +20,7 @@ export type OAuthClient = {
   redirectUris: string[]
   tokenEndpointAuthMethod: 'none'
   scopes: string
+  firstParty: boolean
   createdAt: Date
 }
 
@@ -61,6 +62,7 @@ export class AuthorizeRepository {
           redirectUris,
           tokenEndpointAuthMethod: row.tokenEndpointAuthMethod,
           scopes: row.scopes,
+          firstParty: row.firstParty,
           createdAt: row.createdAt,
         },
         error: null,
