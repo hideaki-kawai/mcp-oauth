@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "api-mcp",
+  "account_id": "0cb1466586b825ed8044bab1ee7d9457",
   "compatibility_date": "2025-08-03",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/index.tsx",
@@ -10,7 +11,7 @@
       // ローカル開発時は database_id の値は使われない（database_name でローカルD1ファイルが識別される）
       "binding": "DB_API_MCP",
       "database_name": "api-mcp-db",
-      "database_id": "YOUR_API_MCP_D1_DATABASE_ID",
+      "database_id": "b6c49d38-7fa8-4cd5-a521-7301802050fe",
       // packages/database で生成したSQLマイグレーションファイルの参照先
       "migrations_dir": "../../packages/database/migrations/mcp"
     }

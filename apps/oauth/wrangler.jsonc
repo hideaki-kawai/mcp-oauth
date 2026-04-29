@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "oauth",
+  "account_id": "0cb1466586b825ed8044bab1ee7d9457",
   "compatibility_date": "2025-08-03",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/index.tsx",
@@ -10,7 +11,7 @@
       // ローカル開発時は database_id の値は使われない（database_name でローカルD1ファイルが識別される）
       "binding": "DB_OAUTH",
       "database_name": "oauth-db",
-      "database_id": "YOUR_OAUTH_D1_DATABASE_ID",
+      "database_id": "8899541c-36a2-4c6a-9202-c3a3d5904e63",
       // packages/database で生成したSQLマイグレーションファイルの参照先
       "migrations_dir": "../../packages/database/migrations/oauth"
     }
