@@ -20,6 +20,9 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { openAPIRouteHandler } from 'hono-openapi'
 import { authMiddleware } from './middlewares/auth-middleware'
+import authLogoutRoute from './routes/api/auth/logout/post'
+import authRefreshRoute from './routes/api/auth/refresh/post'
+import authTokenRoute from './routes/api/auth/token/post'
 import cryptoHistoryRoute from './routes/api/crypto/history/get'
 import cryptoMarketRoute from './routes/api/crypto/market/get'
 import cryptoPriceRoute from './routes/api/crypto/price/get'
@@ -72,6 +75,7 @@ app.get(
       tags: [
         { name: 'health', description: 'ヘルスチェック' },
         { name: 'discovery', description: 'OAuth Protected Resource Metadata' },
+        { name: 'auth', description: '認証（BFF）' },
         { name: 'fx', description: '為替（FX）— Frankfurter / ECB' },
         { name: 'crypto', description: '暗号通貨 — CoinGecko' },
       ],
@@ -101,6 +105,10 @@ app.get('/', (c) => c.text('api-mcp'))
 export const routes = app
   .route(API_MCP_PATHS.WELL_KNOWN, wellKnownRoute)
   .route('/api', healthRoute)
+  // BFF: 認証（/api/auth/*）
+  .route(API_MCP_PATHS.AUTH_TOKEN, authTokenRoute)
+  .route(API_MCP_PATHS.AUTH_REFRESH, authRefreshRoute)
+  .route(API_MCP_PATHS.AUTH_LOGOUT, authLogoutRoute)
   // FX
   .route(API_MCP_PATHS.FX_RATE, fxRateRoute)
   .route(API_MCP_PATHS.FX_CONVERT, fxConvertRoute)

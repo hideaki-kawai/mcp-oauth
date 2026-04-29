@@ -41,6 +41,7 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   // ペイロードを型安全に再構築（as キャスト不使用）
   if (
     typeof raw.sub !== 'string' ||
+    typeof raw.email !== 'string' ||
     typeof raw.client_id !== 'string' ||
     typeof raw.scope !== 'string' ||
     typeof raw.iat !== 'number' ||
@@ -51,6 +52,7 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
 
   const payload: AccessTokenPayload = {
     sub: raw.sub,
+    email: raw.email,
     client_id: raw.client_id,
     scope: raw.scope,
     type: 'access',

@@ -9,3 +9,9 @@ dist/
 worker-configuration.d.ts
 .dev.vars
 .wrangler/
+!/*.png
+.playwright-mcp/
+
+# React Router
+/apps/web/.react-router/
+/apps/web/build/

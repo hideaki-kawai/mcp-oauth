@@ -830,10 +830,25 @@ pnpm -F @mcp-oauth/web dev        # http://localhost:5173
 
 ### 5-5. Cloudflareデプロイ（web）
 
-```bash
-pnpm -F @mcp-oauth/api-mcp deploy  # BFFエンドポイント追加分を再デプロイ
-pnpm -F @mcp-oauth/web deploy
+GitHub Actions でデプロイする。他の Worker と同様に `deploy-web.yml` を作成する。
+
 ```
+.github/workflows/
+  deploy-oauth.yml    ← 作成済み
+  deploy-api-mcp.yml  ← 作成済み
+  deploy-web.yml      ← フェーズ5で作成
+```
+
+web は静的アセット（Cloudflare Workers Static Assets）なのでシークレット設定は不要。
+ただし Vite ビルド時に環境変数を埋め込む必要があるため、`VITE_*` を GitHub Secrets または GitHub Variables に登録する。
+
+| 変数 | 値 |
+|------|-----|
+| `VITE_API_BASE_URL` | `https://api-mcp.h-kawai-tech.workers.dev` |
+| `VITE_OAUTH_BASE_URL` | `https://oauth.h-kawai-tech.workers.dev` |
+| `VITE_WEB_BASE_URL` | `https://web.h-kawai-tech.workers.dev` |
+
+ローカル確認後に api-mcp（BFF追加分）と web を一緒にデプロイする。
 
 ---
 

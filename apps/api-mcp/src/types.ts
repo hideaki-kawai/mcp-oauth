@@ -35,6 +35,7 @@ export type Bindings = {
 /** OAuth サーバー（apps/oauth）の JwtDomain.signAccessToken と同形式 */
 export type AccessTokenPayload = {
   sub: string
+  email: string
   client_id: string
   scope: string
   type: 'access'

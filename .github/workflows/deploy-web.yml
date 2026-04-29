@@ -1,0 +1,40 @@
+name: Deploy (web)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy web to Cloudflare Workers Static Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          VITE_API_BASE_URL: https://api-mcp.h-kawai-tech.workers.dev
+          VITE_OAUTH_BASE_URL: https://oauth.h-kawai-tech.workers.dev
+          VITE_WEB_BASE_URL: https://web.h-kawai-tech.workers.dev
+        run: pnpm run deploy
