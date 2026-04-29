@@ -15,8 +15,12 @@ const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? 'http://localhost:
 export const clientLoader = (_: Route.ClientLoaderArgs) => {
   // await せずに Promise を返すことでページを先に表示し、データは Suspense で遅延ロード
   const ratesPromise = Promise.all([
-    api.api.fx.rate.$get({ query: { from: 'USD', to: 'JPY' } }).then((res) => (res.ok ? res.json() : null)),
-    api.api.crypto.price.$get({ query: { symbol: 'BTC' } }).then((res) => (res.ok ? res.json() : null)),
+    api.api.fx.rate
+      .$get({ query: { from: 'USD', to: 'JPY' } })
+      .then((res) => (res.ok ? res.json() : null)),
+    api.api.crypto.price
+      .$get({ query: { symbol: 'BTC' } })
+      .then((res) => (res.ok ? res.json() : null)),
   ])
 
   return { ratesPromise }
@@ -70,7 +74,9 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
                   <p className="mt-1 text-2xl font-semibold text-gray-900">
                     {crypto ? `$${crypto.price.toLocaleString()}` : '---'}
                   </p>
-                  {crypto && <p className="mt-1 text-xs text-gray-400">{crypto.symbol.toUpperCase()}</p>}
+                  {crypto && (
+                    <p className="mt-1 text-xs text-gray-400">{crypto.symbol.toUpperCase()}</p>
+                  )}
                 </div>
               </div>
             )}
