@@ -1,11 +1,11 @@
-name: DB Migrate
+name: DB Migrate (api-mcp)
 
 on:
   workflow_dispatch:
 
 jobs:
   migrate:
-    name: Run DB migrations
+    name: Run DB migrations (api-mcp)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,12 +22,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Migrate oauth DB
-        working-directory: apps/oauth
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm db:migrate:remote
 
       - name: Migrate api-mcp DB
         working-directory: apps/api-mcp
