@@ -34,7 +34,7 @@ const route = new Hono<AppEnv>().post(
 
     // リフレッシュトークンが Cookie にない場合も 200 を返す（冪等）。
     if (refreshToken) {
-      await AuthLogoutService.logout(c.env.OAUTH_SERVICE, refreshToken)
+      await AuthLogoutService.logout(c.env.OAUTH_SERVICE, refreshToken, c.env.OAUTH_INTERNAL_URL)
     }
 
     deleteCookie(c, API_MCP_COOKIES.REFRESH_TOKEN, { path: API_MCP_PATHS.AUTH })

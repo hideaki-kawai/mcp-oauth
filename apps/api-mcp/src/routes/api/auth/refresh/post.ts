@@ -38,7 +38,8 @@ const route = new Hono<AppEnv>().post(
     const result = await AuthRefreshService.refresh(
       c.env.OAUTH_SERVICE,
       c.env.JWT_SECRET,
-      refreshToken
+      refreshToken,
+      c.env.OAUTH_INTERNAL_URL
     )
 
     if (!result.success) {

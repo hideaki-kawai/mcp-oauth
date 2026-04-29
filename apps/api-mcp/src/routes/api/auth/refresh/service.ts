@@ -21,21 +21,25 @@ export class AuthRefreshService {
   static async refresh(
     oauthService: Fetcher,
     jwtSecret: string,
-    refreshToken: string
+    refreshToken: string,
+    oauthInternalUrl?: string
   ): Promise<Result<RefreshResult>> {
-    const res = await oauthService
-      .fetch(`https://oauth${OAUTH_PATHS.TOKEN}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-          client_id: OAUTH_CLIENT_IDS.WEB,
-        }).toString(),
-      })
-      .catch((err: unknown): never => {
-        throw new Error(err instanceof Error ? err.message : 'network error')
-      })
+    const url = `${oauthInternalUrl ?? 'https://oauth'}${OAUTH_PATHS.TOKEN}`
+    const doFetch = oauthInternalUrl
+      ? (u: string, init: RequestInit) => fetch(u, init)
+      : (u: string, init: RequestInit) => oauthService.fetch(u, init)
+
+    const res = await doFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: OAUTH_CLIENT_IDS.WEB,
+      }).toString(),
+    }).catch((err: unknown): never => {
+      throw new Error(err instanceof Error ? err.message : 'network error')
+    })
 
     if (!res.ok) {
       return { success: false, data: null, error: 'invalid_grant' }

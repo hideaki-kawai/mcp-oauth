@@ -62,9 +62,7 @@ const route = new Hono<AppEnv>().post(
       userId = session.sub
     } catch {
       c.status(401)
-      return c.render(
-        <ErrorScreen title="セッションが無効です" message="再ログインしてください" />
-      )
+      return c.render(<ErrorScreen title="セッションが無効です" message="再ログインしてください" />)
     }
 
     // 2. ConsentService 呼び出し

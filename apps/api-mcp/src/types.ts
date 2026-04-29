@@ -30,6 +30,10 @@ export type Bindings = {
 
   // JWT 署名鍵（OAuth と共有・.dev.vars / wrangler secret）
   JWT_SECRET: string
+
+  // ローカル開発時のみ: OAuth サーバーの HTTP URL（Service Binding の D1 分離回避）
+  // 本番では未設定（Service Binding を使用）
+  OAUTH_INTERNAL_URL?: string
 }
 
 /** OAuth サーバー（apps/oauth）の JwtDomain.signAccessToken と同形式 */

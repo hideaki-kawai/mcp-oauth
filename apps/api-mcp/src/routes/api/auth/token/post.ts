@@ -37,11 +37,11 @@ const route = new Hono<AppEnv>().post(
   async (c) => {
     const { code, code_verifier, redirect_uri } = c.req.valid('json')
 
-    const result = await AuthTokenService.exchangeCode(c.env.OAUTH_SERVICE, {
-      code,
-      codeVerifier: code_verifier,
-      redirectUri: redirect_uri,
-    })
+    const result = await AuthTokenService.exchangeCode(
+      c.env.OAUTH_SERVICE,
+      { code, codeVerifier: code_verifier, redirectUri: redirect_uri },
+      c.env.OAUTH_INTERNAL_URL
+    )
 
     if (!result.success) {
       return c.json({ error: result.error ?? 'invalid_grant' }, 400)

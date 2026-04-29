@@ -19,6 +19,7 @@ import { describeRoute, validator } from 'hono-openapi'
 import { JwtDomain } from '../../domains/jwt'
 import { authorizeQuerySchema } from '../../schemas/dto'
 import type { AppEnv } from '../../types'
+import { ConsentService } from './consent/service'
 import { AuthorizeService } from './service'
 import { ConsentScreen, ErrorScreen, LoginScreen } from './views'
 
@@ -73,20 +74,41 @@ const route = new Hono<AppEnv>().get(
 
     // 2. OAuth セッション Cookie を検証
     const cookie = getCookie(c, OAUTH_COOKIES.SESSION)
-    let isLoggedIn = false
+    let userId: string | null = null
     if (cookie) {
       try {
-        await JwtDomain.verifyOAuthSession(cookie, c.env.JWT_SECRET)
-        isLoggedIn = true
+        const session = await JwtDomain.verifyOAuthSession(cookie, c.env.JWT_SECRET)
+        userId = session.sub
       } catch {
         // 期限切れ・改ざんされた Cookie → 未ログイン扱い
-        isLoggedIn = false
       }
     }
 
     // 3. 画面振り分け
-    if (!isLoggedIn) {
+    if (!userId) {
       return c.render(<LoginScreen query={query} />)
+    }
+
+    // first_party クライアントは同意画面をスキップして自動承認
+    if (client.firstParty) {
+      const result = await ConsentService.handle(c.env.DB_OAUTH, {
+        form: {
+          action: 'approve',
+          response_type: query.response_type,
+          client_id: query.client_id,
+          redirect_uri: query.redirect_uri,
+          code_challenge: query.code_challenge,
+          code_challenge_method: query.code_challenge_method,
+          scope: query.scope ?? client.scopes,
+          state: query.state,
+        },
+        userId,
+      })
+      if (!result.success) {
+        c.status(500)
+        return c.render(<ErrorScreen title="サーバーエラー" message={result.error} />)
+      }
+      return c.redirect(result.data.redirectUrl, 303)
     }
 
     return c.render(

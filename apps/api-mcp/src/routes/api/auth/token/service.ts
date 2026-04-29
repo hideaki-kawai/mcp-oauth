@@ -17,23 +17,27 @@ export type TokenExchangeResult = {
 export class AuthTokenService {
   static async exchangeCode(
     oauthService: Fetcher,
-    input: { code: string; codeVerifier: string; redirectUri: string }
+    input: { code: string; codeVerifier: string; redirectUri: string },
+    oauthInternalUrl?: string
   ): Promise<Result<TokenExchangeResult>> {
-    const res = await oauthService
-      .fetch(`https://oauth${OAUTH_PATHS.TOKEN}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code: input.code,
-          code_verifier: input.codeVerifier,
-          client_id: OAUTH_CLIENT_IDS.WEB,
-          redirect_uri: input.redirectUri,
-        }).toString(),
-      })
-      .catch((err: unknown): never => {
-        throw new Error(err instanceof Error ? err.message : 'network error')
-      })
+    const url = `${oauthInternalUrl ?? 'https://oauth'}${OAUTH_PATHS.TOKEN}`
+    const doFetch = oauthInternalUrl
+      ? (u: string, init: RequestInit) => fetch(u, init)
+      : (u: string, init: RequestInit) => oauthService.fetch(u, init)
+
+    const res = await doFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: input.code,
+        code_verifier: input.codeVerifier,
+        client_id: OAUTH_CLIENT_IDS.WEB,
+        redirect_uri: input.redirectUri,
+      }).toString(),
+    }).catch((err: unknown): never => {
+      throw new Error(err instanceof Error ? err.message : 'network error')
+    })
 
     if (!res.ok) {
       const body = await res.json<{ error?: string }>().catch((): { error?: string } => ({}))
