@@ -943,72 +943,73 @@ pnpm -F @mcp-oauth/web test
 ## 実装チェックリスト
 
 ### フェーズ0: 環境セットアップ
-- [ ] 各アプリ・パッケージの依存パッケージインストール
-- [ ] `.dev.vars` に JWT_SECRET を設定
-- [ ] `pnpm dev` で全アプリが起動する
+- [x] 各アプリ・パッケージの依存パッケージインストール
+- [x] `.dev.vars` に JWT_SECRET を設定
+- [x] `pnpm dev` で全アプリが起動する
 
 ### フェーズ1: 共有パッケージ
-- [ ] DB_OAUTH スキーマ定義
-- [ ] DB_API_MCP スキーマ定義
-- [ ] マイグレーション生成・ローカル適用
-- [ ] シーダー実装・実行
-- [ ] `apps/oauth/src/libs/` ユーティリティ実装・テスト
-- [ ] `apps/web/app/shared/lib/pkce.ts` 実装・テスト
+- [x] DB_OAUTH スキーマ定義
+- [x] DB_API_MCP スキーマ定義
+- [x] マイグレーション生成・ローカル適用
+- [x] シーダー実装・実行
+- [x] `apps/oauth/src/libs/` ユーティリティ実装・テスト（`token.spec.ts` / `packages/utils/password.spec.ts`）
+- [x] `apps/web/app/shared/lib/pkce.ts` 実装・テスト（`pkce.spec.ts`）
 
 ### フェーズ2: OAuthサーバー
-- [ ] `GET /.well-known/oauth-authorization-server`
-- [ ] `domains/jwt` 実装・テスト
-- [ ] `POST /register` 実装・テスト
-- [ ] `GET /authorize` ログイン・同意画面HTML
-- [ ] `POST /authorize/login` 実装・テスト
-- [ ] `POST /authorize/consent` 実装・テスト
-- [ ] `POST /token` (authorization_code) 実装・テスト
-- [ ] `POST /token` (refresh_token) 実装・テスト
+- [x] `GET /.well-known/oauth-authorization-server`
+- [x] `domains/jwt` 実装・テスト（`jwt/index.spec.ts`）
+- [x] `POST /register` 実装・テスト（`register/service.spec.ts`）
+- [x] `GET /authorize` ログイン・同意画面HTML
+- [x] `POST /authorize/login` 実装・テスト（`authorize/login/service.spec.ts`）
+- [x] `POST /authorize/consent` 実装・テスト（`authorize/consent/service.spec.ts`）
+- [x] `POST /token` (authorization_code) 実装・テスト（`token/service.spec.ts`）
+- [x] `POST /token` (refresh_token) 実装・テスト（`token/service.spec.ts`）
 
 ### フェーズ3: api-mcpサーバー
-- [ ] `GET /.well-known/oauth-protected-resource`
-- [ ] `middlewares/auth-middleware.ts`（JWT 検証）実装・テスト
-- [ ] `libs/coingecko.ts`（公式 SDK ラッパー）
-- [ ] `libs/frankfurter.ts`（fetch ラッパー + zod 検証）
-- [ ] `schemas/dto/fx.ts`, `schemas/dto/crypto.ts`（zod スキーマ）
-- [ ] `domains/fx`, `domains/crypto`（共通データ層）実装・テスト
-- [ ] Web API: `GET /api/fx/rate`
-- [ ] Web API: `GET /api/fx/convert`
-- [ ] Web API: `GET /api/fx/history`
-- [ ] Web API: `GET /api/crypto/price`
-- [ ] Web API: `GET /api/crypto/market`
-- [ ] Web API: `GET /api/crypto/history`
-- [ ] MCP Tool: `get_fx_rate`
-- [ ] MCP Tool: `convert_currency`
-- [ ] MCP Tool: `get_fx_history`
-- [ ] MCP Tool: `get_crypto_price`
-- [ ] MCP Tool: `get_crypto_market`
-- [ ] MCP Tool: `get_crypto_history`
-- [ ] MCP Prompt: `daily_market_brief`（日本語）
-- [ ] MCP Prompt: `crypto_deep_dive`（日本語）
-- [ ] `GET /mcp` / `POST /mcp` 実装（`@hono/mcp` + Tool/Prompt 登録）
+- [x] `GET /.well-known/oauth-protected-resource`
+- [x] `middlewares/auth-middleware.ts`（JWT 検証）実装（テストなし）
+- [x] `libs/coingecko.ts`（公式 SDK ラッパー）
+- [x] `libs/frankfurter.ts`（fetch ラッパー + zod 検証）
+- [x] `schemas/dto/fx.ts`, `schemas/dto/crypto.ts`（zod スキーマ）
+- [x] `domains/fx` 実装・テスト（`fx/index.spec.ts`）
+- [x] `domains/crypto` 実装（テストなし）
+- [x] Web API: `GET /api/fx/rate`
+- [x] Web API: `GET /api/fx/convert`
+- [x] Web API: `GET /api/fx/history`
+- [x] Web API: `GET /api/crypto/price`
+- [x] Web API: `GET /api/crypto/market`
+- [x] Web API: `GET /api/crypto/history`
+- [x] MCP Tool: `get_fx_rate`
+- [x] MCP Tool: `convert_currency`
+- [x] MCP Tool: `get_fx_history`
+- [x] MCP Tool: `get_crypto_price`
+- [x] MCP Tool: `get_crypto_market`
+- [x] MCP Tool: `get_crypto_history`
+- [x] MCP Prompt: `daily_market_brief`（日本語）
+- [x] MCP Prompt: `crypto_deep_dive`（日本語）
+- [x] `GET /mcp` / `POST /mcp` 実装（`@hono/mcp` + Tool/Prompt 登録）
 
 ### フェーズ4: Cloudflareセットアップ・デプロイ
-- [ ] `wrangler login`
-- [ ] `wrangler d1 create oauth-db` → `wrangler.jsonc` に `database_id` を設定
-- [ ] `wrangler d1 create api-mcp-db` → `wrangler.jsonc` に `database_id` を設定
-- [ ] `wrangler secret put JWT_SECRET` （oauth・api-mcp 両方）
-- [ ] 本番D1にマイグレーション適用
-- [ ] 本番D1にシード投入
-- [ ] oauth・api-mcp デプロイ
-- [ ] Claude web版からMCP接続確認
+- [x] `wrangler login`
+- [x] `wrangler d1 create oauth-db` → `wrangler.jsonc` に `database_id` を設定
+- [x] `wrangler d1 create api-mcp-db` → `wrangler.jsonc` に `database_id` を設定
+- [x] `wrangler secret put JWT_SECRET` （oauth・api-mcp 両方）
+- [x] 本番D1にマイグレーション適用
+- [x] 本番D1にシード投入
+- [x] oauth・api-mcp デプロイ
+- [x] Claude web版からMCP接続確認
 
 ### フェーズ5: Webフロントエンド
-- [ ] `POST /api/auth/token` 実装・テスト
-- [ ] `POST /api/auth/refresh` 実装・テスト
-- [ ] `POST /api/auth/logout` 実装・テスト
-- [ ] `auth-store.ts` 実装
-- [ ] `api.ts`（Hono RPCクライアント）実装
-- [ ] `auth-context.ts` 実装
-- [ ] `auth-middleware.ts` 実装
-- [ ] `/login` ページ実装
-- [ ] `/auth/callback` ページ実装
-- [ ] `(private)/layout.tsx` 実装
-- [ ] ホームページ実装
-- [ ] ローカル動作確認（ブラウザでOAuthフロー完結）
-- [ ] api-mcp 再デプロイ（BFF追加分）・web デプロイ
+- [x] `POST /api/auth/token` 実装（テストなし）
+- [x] `POST /api/auth/refresh` 実装（テストなし）
+- [x] `POST /api/auth/logout` 実装（テストなし）
+- [x] `auth-store.ts` 実装
+- [x] `api.ts`（Hono RPCクライアント）実装
+- [x] `auth-context.ts` 実装
+- [x] `auth-middleware.ts` 実装
+- [x] `/login` ページ実装
+- [x] `/auth/callback` ページ実装
+- [x] `(private)/layout.tsx` 実装
+- [x] ホームページ実装
+- [x] ローカル動作確認（ブラウザでOAuthフロー完結）
+- [x] api-mcp 再デプロイ（BFF追加分）・web デプロイ
