@@ -65,8 +65,11 @@ const ADMIN_PASSWORD = 'password'
 
 const WEB_CLIENT_ID = OAUTH_CLIENT_IDS.WEB
 const WEB_CLIENT_NAME = 'web'
-// web フロントエンドの dev サーバーポート（apps/web/package.json の dev スクリプトと一致させる）
-const WEB_REDIRECT_URIS = ['http://localhost:30000/auth/callback']
+// web フロントエンドの dev サーバーポートと本番 URL
+const WEB_REDIRECT_URIS = [
+  'http://localhost:30000/auth/callback',
+  'https://web.h-kawai-tech.workers.dev/auth/callback',
+]
 const WEB_SCOPES = 'read write'
 
 // ─────────────────────────────────────────────────────────

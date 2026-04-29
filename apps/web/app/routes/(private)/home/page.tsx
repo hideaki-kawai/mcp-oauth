@@ -5,8 +5,11 @@
 import { useRouteLoaderData } from 'react-router'
 import { api } from '~/shared/lib/api'
 import { authStore } from '~/shared/lib/auth-store'
+import { OAUTH_PATHS, WEB_PATHS } from '@mcp-oauth/constants'
 import type { clientLoader as layoutLoader } from '../layout'
 import type { Route } from './+types/page'
+
+const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? 'http://localhost:30002'
 
 export const clientLoader = async (_: Route.ClientLoaderArgs) => {
   const [fxRes, cryptoRes] = await Promise.all([
@@ -24,13 +27,30 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
   const layoutData = useRouteLoaderData<typeof layoutLoader>('routes/(private)/layout')
   const user = layoutData?.user ?? authStore.getUser()
   const { fx, crypto } = loaderData
+  const handleLogout = async () => {
+    await api.api.auth.logout.$post()
+    authStore.clearToken()
+    // oauth_session Cookie は OAuth サーバードメインに属するため BFF では削除できない。
+    // ブラウザを OAuth の /logout へ全画面遷移させて Cookie を削除してもらう。
+    const loginUrl = `${import.meta.env.VITE_WEB_BASE_URL ?? 'http://localhost:30000'}${WEB_PATHS.LOGIN}`
+    window.location.href = `${OAUTH_BASE_URL}${OAUTH_PATHS.LOGOUT}?redirect=${encodeURIComponent(loginUrl)}`
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-2xl">
-        <header className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">ダッシュボード</h1>
-          {user && <p className="mt-1 text-sm text-gray-500">ログイン中: {user.email}</p>}
+        <header className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">ダッシュボード</h1>
+            {user && <p className="mt-1 text-sm text-gray-500">ログイン中: {user.email}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            ログアウト
+          </button>
         </header>
 
         <div className="grid gap-4 sm:grid-cols-2">

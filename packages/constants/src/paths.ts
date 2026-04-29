@@ -14,6 +14,7 @@ export const OAUTH_PATHS = {
   AUTHORIZE_CONSENT: '/authorize/consent', // OAuth 同意
   TOKEN: '/token', // OAuth 認可コードからアクセストークン発行
   REVOKE: '/revoke', // OAuth リフレッシュトークン失効
+  LOGOUT: '/logout', // OAuth セッション Cookie 削除
 } as const
 
 /** api-mcpサーバー（apps/api-mcp）のパス */
