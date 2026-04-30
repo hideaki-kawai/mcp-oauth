@@ -6,6 +6,8 @@ Webフロントエンド（`apps/web`）のモノレポ。
 ClaudeからMCPサーバーへのアクセスと、通常のWebアプリを同一のOAuth認証基盤で管理する。
 OAuth 2.1 準拠（PKCE + DCR + リフレッシュトークン Rotation）。
 
+**本番環境**: https://web.h-kawai-tech.workers.dev/
+
 ## 構成
 
 ```
