@@ -150,8 +150,8 @@ graph TB
     end
 
     Browser -->|アセット配信| Web
-    Browser -->|Hono RPC /api/*| ApiMcp
-    Browser -->|/authorize /logout| OAuth
+    Browser -->|Hono RPC /api/* <br/> /api/auth/token <br/> /api/auth/logout| ApiMcp
+    Browser -->|/authorize <br/> /logout| OAuth
     Claude -->|GET/POST /mcp  JWT Bearer| ApiMcp
     ApiMcp -->|Service Binding| OAuth
     ApiMcp --- ApiMcpDB
